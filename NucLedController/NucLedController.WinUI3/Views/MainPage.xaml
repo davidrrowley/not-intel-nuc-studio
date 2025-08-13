@@ -76,47 +76,94 @@
                                FontWeight="SemiBold"/>
                     </Grid>
                     
-                    <!-- NUC Device Views -->
-                    <Grid Height="200">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <!-- NUC Device Views with Responsive Scaling -->
+                    <ScrollViewer x:Name="NucScrollViewer" 
+                                  ZoomMode="Disabled" 
+                                  HorizontalScrollMode="Auto" 
+                                  VerticalScrollMode="Disabled"
+                                  HorizontalScrollBarVisibility="Auto" 
+                                  VerticalScrollBarVisibility="Disabled"
+                                  SizeChanged="NucScrollViewer_SizeChanged">
+                        <Grid x:Name="ResponsiveNucGrid" Height="350">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
                         
-                        <!-- Top row - perspective views -->
-                        <Border Grid.Row="0" Grid.Column="0" 
-                                Background="#FF1E2832" 
-                                CornerRadius="4" 
-                                Margin="2">
-                            <Rectangle Fill="#FF444444" 
-                                     Width="60" Height="40"
-                                     RadiusX="2" RadiusY="2"/>
-                        </Border>
-                        
+                        <!-- Top row - NUC device views with LED zones -->
+                        <!-- Main NUC Front/Center View -->
                         <Border Grid.Row="0" Grid.Column="1" 
+                                x:Name="FrontNucBorder"
                                 Background="#FF1E2832" 
                                 CornerRadius="4" 
-                                Margin="2">
-                            <Rectangle Fill="#FF444444" 
-                                     Width="60" Height="40"
-                                     RadiusX="2" RadiusY="2"/>
+                                Margin="2"
+                                Padding="8">
+                            <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Grid Width="400" Height="300">
+                                    <!-- Base NUC device image -->
+                                    <Image Source="ms-appx:///Assets/NucImages/nuc_front_base.png"
+                                           Width="400" Height="300"
+                                           Stretch="Fill"/>
+                                    
+                                    <!-- LED overlay using mask image -->
+                                    <Image x:Name="MainFrontLedOverlayImage"
+                                           Width="400" Height="300"
+                                           Stretch="Fill"/>
+                                </Grid>
+                            </Viewbox>
                         </Border>
                         
-                        <Border Grid.Row="0" Grid.Column="2" 
+                        <!-- NUC Left Image-Based View -->
+                        <Border Grid.Row="0" Grid.Column="0" 
+                                x:Name="LeftNucBorder"
                                 Background="#FF1E2832" 
                                 CornerRadius="4" 
-                                Margin="2">
-                            <Rectangle Fill="#FF444444" 
-                                     Width="60" Height="40"
-                                     RadiusX="2" RadiusY="2"/>
+                                Margin="2"
+                                Padding="8">
+                            <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Grid Width="400" Height="300">
+                                    <!-- Base NUC device image -->
+                                    <Image Source="ms-appx:///Assets/NucImages/nuc_left_base.png"
+                                           Width="400" Height="300"
+                                           Stretch="Fill"/>
+                                    
+                                    <!-- LED overlay using mask image -->
+                                    <Image x:Name="MainLeftLedOverlayImage"
+                                           Width="400" Height="300"
+                                           Stretch="Fill"/>
+                                </Grid>
+                            </Viewbox>
+                        </Border>
+                        
+                        <!-- NUC Right Image-Based View -->
+                        <Border Grid.Row="0" Grid.Column="2" 
+                                x:Name="RightNucBorder"
+                                Background="#FF1E2832" 
+                                CornerRadius="4" 
+                                Margin="2"
+                                Padding="8">
+                            <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Grid Width="400" Height="300">
+                                    <!-- Base NUC device image -->
+                                    <Image Source="ms-appx:///Assets/NucImages/nuc_right_base.png"
+                                           Width="400" Height="300"
+                                           Stretch="Fill"/>
+                                    
+                                    <!-- LED overlay using mask image -->
+                                    <Image x:Name="MainRightLedOverlayImage"
+                                           Width="400" Height="300"
+                                           Stretch="Fill"/>
+                                </Grid>
+                            </Viewbox>
                         </Border>
                     </Grid>
+                    </ScrollViewer>
                     
                     <!-- Effects Toggle -->
                     <Grid>

@@ -1,0 +1,5 @@
+# This file represents where nuc-left-led-mask.png should be placed
+# Replace this with your actual left perspective LED mask
+# Dimensions: Must match nuc-left-base.png exactly
+# Format: PNG with alpha channel
+# Content: White areas where LEDs should appear, transparent elsewhere

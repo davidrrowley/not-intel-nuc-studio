@@ -29,6 +29,12 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 
+  <!-- NUC LED Visualization Assets -->
+  <ItemGroup>
+    <Content Include="Assets\NucImages\*.png" />
+    <Content Include="Assets\NucImages\README.md" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.*" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.*" />
