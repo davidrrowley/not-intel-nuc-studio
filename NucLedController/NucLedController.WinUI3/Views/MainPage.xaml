@@ -274,9 +274,14 @@
                     Padding="30"
                     BorderBrush="#FF3A4A57"
                     BorderThickness="1">
-                <StackPanel Spacing="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
                     <!-- Header with Button -->
-                    <Grid>
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -305,11 +310,13 @@
                     </Grid>
                     
                     <!-- System Information Sub-Card -->
-                    <Border Background="#FF1E2832" 
+                    <Border Grid.Row="1" 
+                            Background="#FF1E2832" 
                             CornerRadius="6"
                             Padding="20"
                             BorderBrush="#FF2A3441"
-                            BorderThickness="1">
+                            BorderThickness="1"
+                            Margin="0,0,0,20">
                         <StackPanel Spacing="6">
                             <TextBlock Text="System Model: NUC11BTMi9" 
                                       FontSize="10" 
@@ -344,127 +351,129 @@
                         </StackPanel>
                     </Border>
                     
-                    <!-- Performance Gauges - Single Viewbox for unified scaling -->
-                    <Viewbox Stretch="Uniform" StretchDirection="Both">
-                        <Grid Width="480" Height="240">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <!-- Performance Gauges - Responsive Flow Layout -->
+                    <ScrollViewer x:Name="GaugesScrollViewer"
+                                 Grid.Row="2"
+                                 HorizontalScrollBarVisibility="Auto"
+                                 VerticalScrollBarVisibility="Auto"
+                                 ZoomMode="Disabled"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch"
+                                 Padding="5"
+                                 SizeChanged="GaugesScrollViewer_SizeChanged">
+                        <!-- Dynamic Grid that reconfigures based on available space -->
+                        <Grid x:Name="ResponsiveGaugeGrid" 
+                              HorizontalAlignment="Center" 
+                              VerticalAlignment="Center">
+                            <!-- Grid definitions will be set dynamically in code-behind -->
                             
                             <!-- CPU Gauge Card -->
-                            <Border Grid.Row="0" Grid.Column="0" 
+                            <Border x:Name="CpuGaugeBorder"
                                     Background="Transparent" 
-                                    Margin="10">
+                                    Width="160" Height="160"
+                                    Margin="5">
                                 <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="CPU" 
-                                              FontSize="12" 
                                               Foreground="#FF8A9BA8"
+                                              FontSize="14"
                                               HorizontalAlignment="Center"/>
                                     <controls:CircularGauge x:Name="MainSystemCpuGauge"
-                                                           Width="80" 
-                                                           Height="80"
                                                            Value="20" 
                                                            Maximum="100"
                                                            Unit="°C"
                                                            StrokeColor="#FFFF8C00"
+                                                           Width="110"
+                                                           Height="110"
                                                            HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             
                             <!-- dGPU Gauge Card -->
-                            <Border Grid.Row="0" Grid.Column="1" 
+                            <Border x:Name="DgpuGaugeBorder"
                                     Background="Transparent" 
-                                    Margin="10">
+                                    Width="160" Height="160"
+                                    Margin="5">
                                 <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="dGPU" 
-                                              FontSize="12" 
                                               Foreground="#FF8A9BA8"
+                                              FontSize="14"
                                               HorizontalAlignment="Center"/>
                                     <controls:CircularGauge x:Name="MainSystemGpuGauge"
-                                                           Width="80" 
-                                                           Height="80"
                                                            Value="5" 
                                                            Maximum="100"
                                                            Unit="°C"
                                                            StrokeColor="#FF16C60C"
+                                                           Width="110"
+                                                           Height="110"
                                                            HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             
-                            <!-- Empty slot for balance -->
-                            <Border Grid.Row="0" Grid.Column="2" 
-                                    Background="Transparent" 
-                                    Margin="10">
-                            </Border>
-                            
                             <!-- Memory Gauge Card -->
-                            <Border Grid.Row="1" Grid.Column="0" 
+                            <Border x:Name="MemoryGaugeBorder"
                                     Background="Transparent" 
-                                    Margin="10">
+                                    Width="160" Height="160"
+                                    Margin="5">
                                 <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="Memory" 
-                                              FontSize="12" 
                                               Foreground="#FF8A9BA8"
+                                              FontSize="14"
                                               HorizontalAlignment="Center"/>
                                     <controls:CircularGauge x:Name="MainSystemMemoryGauge"
-                                                           Width="80" 
-                                                           Height="80"
                                                            Value="46" 
                                                            Maximum="100"
                                                            Unit=""
                                                            StrokeColor="#FF0078D4"
+                                                           Width="110"
+                                                           Height="110"
                                                            HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             
                             <!-- Storage Gauge Card -->
-                            <Border Grid.Row="1" Grid.Column="1" 
+                            <Border x:Name="StorageGaugeBorder"
                                     Background="Transparent" 
-                                    Margin="10">
+                                    Width="160" Height="160"
+                                    Margin="5">
                                 <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="Storage" 
-                                              FontSize="12" 
                                               Foreground="#FF8A9BA8"
+                                              FontSize="14"
                                               HorizontalAlignment="Center"/>
                                     <controls:CircularGauge x:Name="MainSystemStorageGauge"
-                                                           Width="80" 
-                                                           Height="80"
                                                            Value="92" 
                                                            Maximum="100"
                                                            Unit=""
                                                            StrokeColor="#FFFF8C00"
+                                                           Width="110"
+                                                           Height="110"
                                                            HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             
                             <!-- System Temperature Gauge Card -->
-                            <Border Grid.Row="1" Grid.Column="2" 
+                            <Border x:Name="SystemTempGaugeBorder"
                                     Background="Transparent" 
-                                    Margin="10">
+                                    Width="160" Height="160"
+                                    Margin="5">
                                 <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock Text="System" 
-                                              FontSize="12" 
                                               Foreground="#FF8A9BA8"
+                                              FontSize="14"
                                               HorizontalAlignment="Center"/>
                                     <controls:CircularGauge x:Name="MainSystemTempGauge"
-                                                           Width="80" 
-                                                           Height="80"
                                                            Value="46" 
                                                            Maximum="100"
                                                            Unit="°C"
                                                            StrokeColor="#FF16C60C"
+                                                           Width="110"
+                                                           Height="110"
                                                            HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
-                    </Viewbox>
-                </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </Border>
         </Grid>
     </Grid>
