@@ -1,8 +1,14 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Windows.UI;
+using Windows.Storage.Streams;
+using Windows.Storage;
+using Windows.Graphics.Imaging;
+using System.Runtime.InteropServices.WindowsRuntime;
 using NucLedController.WinUI3.Helpers;
 
 namespace NucLedController.WinUI3.Views
@@ -14,17 +20,30 @@ namespace NucLedController.WinUI3.Views
     {
         private DispatcherTimer _animationTimer;
         private Random _random = new Random();
-        private List<Border> _gaugeElements;
         private List<Border> _nucElements;
+        private List<Border> _gaugeElements;
 
         public MainPage()
         {
+            WriteDebugToFile("🚀 MainPage constructor called!");
             this.InitializeComponent();
             this.Loaded += OnPageLoaded;
+            WriteDebugToFile("🔗 Loaded event handler attached!");
+        }
+
+        private static void WriteDebugToFile(string message)
+        {
+            try
+            {
+                var debugFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NucLedDebug.txt");
+                File.AppendAllText(debugFile, $"{DateTime.Now:HH:mm:ss.fff} - {message}\n");
+            }
+            catch { /* ignore file errors */ }
         }
 
         private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
+            WriteDebugToFile("📱 OnPageLoaded event fired!");
             InitializeGaugeElements();
             InitializeNucElements();
             InitializeLedOverlays();
@@ -32,42 +51,88 @@ namespace NucLedController.WinUI3.Views
             // Initial layout
             ConfigureResponsiveLayout();
             ConfigureResponsiveNucLayout();
+            WriteDebugToFile("✅ OnPageLoaded completed!");
         }
 
         private async void InitializeLedOverlays()
         {
             try
             {
-                // Create bright yellow LED overlays using the mask images
-                var yellowColor = LedMaskHelper.FromHex("#FFFF00");
+                WriteDebugToFile("🔍 Starting LED overlay initialization...");
                 
-                // Front view LED overlay
-                var frontOverlay = await LedMaskHelper.CreateColoredLedOverlayAsync(
-                    "ms-appx:///Assets/NucImages/nuc_front_mask.png", yellowColor);
-                if (frontOverlay != null && MainFrontLedOverlayImage != null)
+                // Define LED mask configurations with correct file paths
+                var ledConfigs = new[]
                 {
-                    MainFrontLedOverlayImage.Source = frontOverlay;
+                    new { Name = "MainFrontLedOverlayImage", MaskPath = "ms-appx:///Assets/NucImages/nuc_front_mask.png", Color = Color.FromArgb(255, 255, 255, 0) }, // Bright Yellow
+                    new { Name = "MainLeftLedOverlayImage", MaskPath = "ms-appx:///Assets/NucImages/nuc_left_mask.png", Color = Color.FromArgb(255, 255, 255, 0) },   // Bright Yellow  
+                    new { Name = "MainRightLedOverlayImage", MaskPath = "ms-appx:///Assets/NucImages/nuc_right_mask.png", Color = Color.FromArgb(255, 255, 255, 0) } // Bright Yellow
+                };
+
+                foreach (var config in ledConfigs)
+                {
+                    try
+                    {
+                        WriteDebugToFile($"🎯 Processing {config.Name} with mask {config.MaskPath}");
+                        
+                        // Find the Image control
+                        var imageControl = this.FindName(config.Name) as Image;
+                        if (imageControl == null)
+                        {
+                            WriteDebugToFile($"✗ {config.Name} not found in XAML");
+                            continue;
+                        }
+                        
+                        WriteDebugToFile($"✓ Found {config.Name} image control");
+                        
+                        // Try to create LED overlay using improved mask processing
+                        WriteDebugToFile($"🎨 Calling LedMaskHelper.CreateColoredLedOverlayAsync...");
+                        var ledOverlay = await LedMaskHelper.CreateColoredLedOverlayAsync(config.MaskPath, config.Color, threshold: 16);
+                        
+                        if (ledOverlay != null)
+                        {
+                            imageControl.Source = ledOverlay;
+                            imageControl.Opacity = 0.9; // High visibility for testing
+                            WriteDebugToFile($"✅ {config.Name} mask-based LED overlay applied successfully");
+                        }
+                        else
+                        {
+                            WriteDebugToFile($"❌ LedMaskHelper returned null for {config.Name}");
+                            
+                            // FALLBACK: Create yellow test overlay if even improved processing fails
+                            var fallbackOverlay = new WriteableBitmap(100, 100);
+                            var buffer = fallbackOverlay.PixelBuffer.ToArray();
+                            for (int i = 0; i < buffer.Length; i += 4)
+                            {
+                                buffer[i] = 0;     // Blue
+                                buffer[i + 1] = 255; // Green  
+                                buffer[i + 2] = 255; // Red (Yellow = Red + Green)
+                                buffer[i + 3] = 255; // Alpha
+                            }
+                            
+                            using (var stream = fallbackOverlay.PixelBuffer.AsStream())
+                            {
+                                stream.Position = 0;
+                                await stream.WriteAsync(buffer, 0, buffer.Length);
+                            }
+                            fallbackOverlay.Invalidate();
+                            
+                            imageControl.Source = fallbackOverlay;
+                            imageControl.Opacity = 1.0;
+                            WriteDebugToFile($"🟡 {config.Name} fallback yellow overlay applied");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"💥 Error processing {config.Name}: {ex.Message}");
+                        Console.WriteLine($"   Stack trace: {ex.StackTrace}");
+                    }
                 }
                 
-                // Left view LED overlay  
-                var leftOverlay = await LedMaskHelper.CreateColoredLedOverlayAsync(
-                    "ms-appx:///Assets/NucImages/nuc_left_mask.png", yellowColor);
-                if (leftOverlay != null && MainLeftLedOverlayImage != null)
-                {
-                    MainLeftLedOverlayImage.Source = leftOverlay;
-                }
-                
-                // Right view LED overlay
-                var rightOverlay = await LedMaskHelper.CreateColoredLedOverlayAsync(
-                    "ms-appx:///Assets/NucImages/nuc_right_mask.png", yellowColor);
-                if (rightOverlay != null && MainRightLedOverlayImage != null)
-                {
-                    MainRightLedOverlayImage.Source = rightOverlay;
-                }
+                Console.WriteLine("🎯 LED overlay initialization completed");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error initializing LED overlays: {ex.Message}");
+                Console.WriteLine($"💥 Critical error: {ex.Message}");
             }
         }
 
@@ -186,28 +251,64 @@ namespace NucLedController.WinUI3.Views
             if (NucScrollViewer == null || ResponsiveNucGrid == null || _nucElements == null)
                 return;
 
-            var availableWidth = NucScrollViewer.ActualWidth - 20; // Account for padding
+            var availableWidth = NucScrollViewer.ActualWidth - 20;
             var availableHeight = NucScrollViewer.ActualHeight - 20;
             
-            // Base NUC container size
-            const double baseNucWidth = 240;
-            const double baseNucHeight = 200;
+            // Each NUC container needs 216px (200px + 16px margin)
+            const double nucWidth = 216;
+            const double nucHeight = 216;
             
-            // Calculate scaling factor based on available space
-            var widthScale = Math.Min(1.5, Math.Max(0.6, availableWidth / (baseNucWidth * 3.2))); // 3.2 accounts for 3 containers + spacing
-            var heightScale = Math.Min(1.5, Math.Max(0.6, availableHeight / (baseNucHeight * 1.2)));
+            // Calculate how many columns can fit
+            var maxColumns = Math.Max(1, (int)(availableWidth / nucWidth));
+            var maxRows = Math.Max(1, (int)(availableHeight / nucHeight));
             
-            // Use the smaller scale to maintain aspect ratio
-            var scale = Math.Min(widthScale, heightScale);
+            // Determine best arrangement for 3 NUC views
+            int columns, rows;
             
-            // Apply scaling to each NUC container
-            foreach (var nucContainer in _nucElements)
+            if (maxColumns >= 3)
             {
-                if (nucContainer != null)
-                {
-                    nucContainer.Width = baseNucWidth * scale;
-                    nucContainer.Height = baseNucHeight * scale;
-                }
+                // Wide layout: all in one row (3×1)
+                columns = 3;
+                rows = 1;
+            }
+            else if (maxColumns >= 2)
+            {
+                // Medium layout: 2×2 arrangement (2 on top, 1 on bottom)
+                columns = 2;
+                rows = 2;
+            }
+            else
+            {
+                // Narrow layout: single column (1×3)
+                columns = 1;
+                rows = 3;
+            }
+
+            // Clear existing grid definitions
+            ResponsiveNucGrid.ColumnDefinitions.Clear();
+            ResponsiveNucGrid.RowDefinitions.Clear();
+
+            // Add column definitions
+            for (int i = 0; i < columns; i++)
+            {
+                ResponsiveNucGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+            }
+
+            // Add row definitions
+            for (int i = 0; i < rows; i++)
+            {
+                ResponsiveNucGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            }
+
+            // Position NUC elements
+            for (int i = 0; i < _nucElements.Count; i++)
+            {
+                var element = _nucElements[i];
+                var row = i / columns;
+                var col = i % columns;
+
+                Grid.SetRow(element, row);
+                Grid.SetColumn(element, col);
             }
         }
 
