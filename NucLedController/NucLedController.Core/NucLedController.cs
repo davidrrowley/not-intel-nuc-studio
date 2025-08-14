@@ -275,25 +275,36 @@ public class NucLedController : INucLedController
         {
             UpdateStatus($"Setting {zone} to color {color}...");
             
+            // DEBUGGING: Show exactly what we're about to do
+            Console.WriteLine($"🎯 DEBUG: SetZoneColorAsync called - Zone: {zone}, Color: {color}, Brightness: {brightness}");
+            
             // Use the EXACT working sequence from Option 1
             var zoneChar = GetZoneCharacter(zone);
             var colorChannel = GetColorChannel(zone);
             
+            Console.WriteLine($"🎯 DEBUG: Zone mappings - ZoneChar: '{zoneChar}', ColorChannel: '{colorChannel}'");
+            
             // Pattern 1 (static) first
+            Console.WriteLine($"🎯 DEBUG: Step 1 - Setting pattern to static");
             await SendCommandAsync($"{zoneChar}P1");
             await Task.Delay(200);
             
             // Rainbow disable AFTER pattern (critical sequence)
+            Console.WriteLine($"🎯 DEBUG: Step 2 - Disabling rainbow");
             await SendCommandAsync($"{zoneChar}R:0");
             await Task.Delay(200);
             
             // Set color
+            Console.WriteLine($"🎯 DEBUG: Step 3 - Setting color");
             await SendCommandAsync($"{colorChannel}:{color}");
             await Task.Delay(200);
             
             // Set brightness
+            Console.WriteLine($"🎯 DEBUG: Step 4 - Setting brightness");
             await SendCommandAsync($"{zoneChar}V:{brightness}");
             await Task.Delay(200);
+            
+            Console.WriteLine($"🎯 DEBUG: SetZoneColorAsync completed successfully");
             
             // Update state management
             await _stateManager.SetZoneStateAsync(zone, color, brightness, LedPattern.Static, true);
@@ -664,37 +675,49 @@ public class NucLedController : INucLedController
     {
         try
         {
-            // Multiple attempts to kill rainbow on startup (from working initialization)
+            Console.WriteLine($"🎯 DEBUG: Starting InitializeNoRainbowAsync");
+            
+            // EXACT working sequence - DO NOT change order
             for (int attempt = 1; attempt <= 3; attempt++)
             {
-                // Reset 
+                Console.WriteLine($"🎯 DEBUG: Initialization attempt {attempt}/3");
+                
+                // Step 1: Reset everything first
+                Console.WriteLine($"🎯 DEBUG: Step 1 - Reset");
                 await SendCommandAsync("RST");
                 await Task.Delay(300);
+                
+                // Step 2: POWER ON THE LEDS - This is critical!
+                Console.WriteLine($"🎯 DEBUG: Step 2 - Power on LEDs (BTN:1)");
                 await SendCommandAsync("BTN:1");
                 await Task.Delay(300);
                 
-                // Set ALL zones to static pattern
+                // Step 3: Set ALL zones to static pattern FIRST
+                Console.WriteLine($"🎯 DEBUG: Step 3 - Set static patterns");
                 await SendCommandAsync("AP1");
                 await SendCommandAsync("BP1");
                 await SendCommandAsync("CP1");
                 await SendCommandAsync("DP1");
                 await Task.Delay(300);
                 
-                // CRITICAL: Rainbow disable AFTER patterns
+                // Step 4: CRITICAL - Rainbow disable AFTER patterns
+                Console.WriteLine($"🎯 DEBUG: Step 4 - Disable rainbow after patterns");
                 await SendCommandAsync("AR:0");
                 await SendCommandAsync("BR:0");
                 await SendCommandAsync("CR:0");
                 await SendCommandAsync("DR:0");
                 await Task.Delay(300);
                 
-                // Set red color for visibility
-                await SendCommandAsync("C1:0");
-                await SendCommandAsync("C2:0");
-                await SendCommandAsync("C3:0");
-                await SendCommandAsync("C4:0");
+                // Step 5: Set initial visible color (not black!)
+                Console.WriteLine($"🎯 DEBUG: Step 5 - Set initial red color for visibility");
+                await SendCommandAsync("C1:16711680");  // Red
+                await SendCommandAsync("C2:16711680");  // Red
+                await SendCommandAsync("C3:16711680");  // Red
+                await SendCommandAsync("C4:16711680");  // Red
                 await Task.Delay(300);
                 
-                // Max brightness
+                // Step 6: Set brightness to maximum
+                Console.WriteLine($"🎯 DEBUG: Step 6 - Set maximum brightness");
                 await SendCommandAsync("AV:5");
                 await SendCommandAsync("BV:5");
                 await SendCommandAsync("CV:5");
@@ -702,10 +725,12 @@ public class NucLedController : INucLedController
                 await Task.Delay(500);
             }
             
-            return LedCommandResult.SuccessResult("Initialization complete");
+            Console.WriteLine($"🎯 DEBUG: InitializeNoRainbowAsync completed");
+            return LedCommandResult.SuccessResult("Initialization complete - LEDs should be visible red");
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"🎯 DEBUG: InitializeNoRainbowAsync failed: {ex.Message}");
             return LedCommandResult.FailureResult($"Initialization failed: {ex.Message}", ex);
         }
     }
@@ -714,9 +739,17 @@ public class NucLedController : INucLedController
     {
         if (_serialPort == null) return;
         
-        var cmd = command + "\n";
+        var cmd = command + "\r\n";  // Try CRLF instead of just LF
         var bytes = Encoding.UTF8.GetBytes(cmd);
+        
+        // DEBUGGING: Show exactly what we're sending
+        Console.WriteLine($"🔧 DEBUG: Sending command: '{command}' (bytes: {string.Join(",", bytes)})");
+        Console.WriteLine($"🔧 DEBUG: Serial port state - IsOpen: {_serialPort.IsOpen}, BytesToWrite: {_serialPort.BytesToWrite}");
+        
         _serialPort.Write(bytes, 0, bytes.Length);
+        
+        // Check if data was actually sent
+        Console.WriteLine($"🔧 DEBUG: After write - BytesToWrite: {_serialPort.BytesToWrite}");
         
         // Small delay to prevent overwhelming the device
         await Task.Delay(50);
