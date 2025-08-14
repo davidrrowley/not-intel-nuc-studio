@@ -5,14 +5,16 @@ namespace NucLedController.Core.Models;
 /// </summary>
 public static class LedColors
 {
-    public const int Red = 0;
-    public const int Green = 96;
-    public const int Blue = 160;
-    public const int Yellow = 70;
-    public const int Purple = 200;
-    public const int Cyan = 128;
-    public const int White = 255;
-    public const int Off = 0;
+    public const int Red = 16711680;      // 0xFF0000 - pure red
+    public const int Green = 65280;       // 0x00FF00 - pure green  
+    public const int Blue = 255;          // 0x0000FF - pure blue
+    public const int Yellow = 16776960;   // 0xFFFF00 - red + green
+    public const int Purple = 16711935;   // 0xFF00FF - red + blue
+    public const int Cyan = 65535;        // 0x00FFFF - green + blue
+    public const int White = 16777215;    // 0xFFFFFF - all colors
+    public const int Orange = 16753920;   // 0xFF8000 - red + half green
+    public const int Black = 0;           // 0x000000 - no color (off)
+    public const int Off = 0;             // Alias for Black
     
     /// <summary>
     /// Gets a user-friendly name for a color value
@@ -28,6 +30,8 @@ public static class LedColors
             Purple => "Purple",
             Cyan => "Cyan",
             White => "White",
+            Orange => "Orange",
+            Black => "Off",
             _ => $"Custom ({colorValue})"
         };
     }

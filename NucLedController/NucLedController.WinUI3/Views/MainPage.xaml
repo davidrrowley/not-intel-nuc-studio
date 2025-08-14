@@ -177,7 +177,7 @@
                                      x:Name="EffectsToggle"
                                      OnContent="ON" 
                                      OffContent="OFF"
-                                     IsOn="True"
+                                     IsOn="False"
                                      Foreground="#FF8A9BA8"/>
                     </Grid>
                 </StackPanel>

@@ -174,7 +174,7 @@ namespace NucLedController.WinUI3.Helpers
         {
             try
             {
-                var debugFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NucLedDebug.txt");
+                var debugFile = Path.Combine(@"e:\Users\131858866\Github repos\not_intel_nuc_studio\NucLedController\logs", "NucLedDebug.txt");
                 File.AppendAllText(debugFile, $"{DateTime.Now:HH:mm:ss.fff} - {message}\n");
             }
             catch { /* ignore file errors */ }

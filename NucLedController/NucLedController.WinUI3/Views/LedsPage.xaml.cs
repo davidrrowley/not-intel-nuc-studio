@@ -1,8 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using NucLedController.Core;
-using NucLedController.Core.Interfaces;
+using NucLedController.Client;
 using System;
 using System.Threading.Tasks;
 
@@ -10,12 +9,24 @@ namespace NucLedController.WinUI3.Views
 {
     public partial class LedsPage : Page
     {
-        private INucLedController? _ledController;
+        private NucLedServiceClient? _serviceClient;
         private bool _effectsEnabled = false;
 
         public LedsPage()
         {
             this.InitializeComponent();
+            // Initialize with test mode message
+            ConnectionStatus.Text = "Ready to connect to service";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Orange);
+        }
+
+        private NucLedServiceClient GetServiceClient()
+        {
+            if (_serviceClient == null)
+            {
+                _serviceClient = new NucLedServiceClient();
+            }
+            return _serviceClient;
         }
 
         private void OnBackClicked(object sender, RoutedEventArgs e)
@@ -23,13 +34,56 @@ namespace NucLedController.WinUI3.Views
             Frame.GoBack();
         }
 
-        private void OnEffectsToggled(object sender, RoutedEventArgs e)
+        private async void OnEffectsToggled(object sender, RoutedEventArgs e)
         {
             _effectsEnabled = EffectsToggle.IsChecked ?? false;
             EffectsToggle.Content = _effectsEnabled ? "ON" : "OFF";
             EffectsToggle.Background = _effectsEnabled ? 
                 new SolidColorBrush(Microsoft.UI.Colors.DodgerBlue) : 
                 new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 75, 85, 99));
+            
+            // Control actual hardware through service
+            try
+            {
+                var serviceClient = GetServiceClient();
+                if (_effectsEnabled)
+                {
+                    ConnectionStatus.Text = "Turning LEDs ON...";
+                    ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Yellow);
+                    var result = await serviceClient.TurnOnAsync();
+                    if (result.Success)
+                    {
+                        ConnectionStatus.Text = "✅ LEDs turned ON";
+                        ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightGreen);
+                    }
+                    else
+                    {
+                        ConnectionStatus.Text = $"❌ Failed to turn ON: {result.Message}";
+                        ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Orange);
+                    }
+                }
+                else
+                {
+                    ConnectionStatus.Text = "Turning LEDs OFF...";
+                    ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Yellow);
+                    var result = await serviceClient.TurnOffAsync();
+                    if (result.Success)
+                    {
+                        ConnectionStatus.Text = "✅ LEDs turned OFF";
+                        ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightGreen);
+                    }
+                    else
+                    {
+                        ConnectionStatus.Text = $"❌ Failed to turn OFF: {result.Message}";
+                        ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Orange);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ConnectionStatus.Text = $"🔥 Service error: {ex.Message}";
+                ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Red);
+            }
             
             // Update LED visualizations
             UpdateLedVisualizations();
@@ -66,31 +120,52 @@ namespace NucLedController.WinUI3.Views
         {
             try
             {
-                _ledController = new Core.NucLedController();
-                var result = await _ledController.ConnectAsync();
+                ConnectionStatus.Text = "Connecting to service...";
+                ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Yellow);
                 
-                if (result.Success)
+                var serviceClient = GetServiceClient();
+                // Test service connection and hardware status
+                var (pingSuccess, connected, message) = await serviceClient.PingAsync();
+                
+                if (pingSuccess && connected)
                 {
-                    ConnectionStatus.Text = "Connected";
-                    ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.LightGreen);
-                    ConnectButton.Content = "Disconnect";
+                    ConnectionStatus.Text = $"✅ Service connected - Hardware: Ready";
+                    ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightGreen);
+                    ConnectButton.Content = "Connected";
+                    
+                    // Get current hardware status to sync the toggle
+                    var (statusSuccess, status, statusMessage) = await serviceClient.GetStatusAsync();
+                    if (statusSuccess && status != null)
+                    {
+                        _effectsEnabled = status.ButtonStatus;
+                        EffectsToggle.IsChecked = _effectsEnabled;
+                        EffectsToggle.Content = _effectsEnabled ? "ON" : "OFF";
+                        EffectsToggle.Background = _effectsEnabled ? 
+                            new SolidColorBrush(Microsoft.UI.Colors.DodgerBlue) : 
+                            new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 75, 85, 99));
+                        UpdateLedVisualizations();
+                        
+                        ConnectionStatus.Text = $"✅ Connected - Hardware LEDs: {(_effectsEnabled ? "ON" : "OFF")}";
+                    }
                 }
                 else
                 {
-                    ConnectionStatus.Text = $"Connection failed: {result.Message}";
-                    ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Orange);
+                    ConnectionStatus.Text = $"❌ Service not available: {message}";
+                    ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Orange);
+                    ConnectButton.Content = "Service Unavailable";
                 }
             }
             catch (Exception ex)
             {
-                ConnectionStatus.Text = $"Error: {ex.Message}";
-                ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
+                ConnectionStatus.Text = $"🔥 Service connection error: {ex.Message}";
+                ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Red);
             }
         }
 
         private async void OnSkullRedClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.SetZoneColorAsync(Core.Models.LedZone.Skull, 0xFF0000));
+            ConnectionStatus.Text = "Individual colors available through Effects toggle";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
             if (_effectsEnabled)
             {
                 SkullLed.Background = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 239, 68, 68));
@@ -100,7 +175,8 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnBottomLeftGreenClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.SetZoneColorAsync(Core.Models.LedZone.BottomLeft, 0x00FF00));
+            ConnectionStatus.Text = "Individual colors available through Effects toggle";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
             if (_effectsEnabled)
             {
                 BottomLeftLed.Fill = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 16, 185, 129));
@@ -110,7 +186,8 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnBottomRightBlueClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.SetZoneColorAsync(Core.Models.LedZone.BottomRight, 0x0000FF));
+            ConnectionStatus.Text = "Individual colors available through Effects toggle";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
             if (_effectsEnabled)
             {
                 BottomRightLed.Fill = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 59, 130, 246));
@@ -120,7 +197,8 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnFrontBottomYellowClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.SetZoneColorAsync(Core.Models.LedZone.FrontBottom, 0xFFFF00));
+            ConnectionStatus.Text = "Individual colors available through Effects toggle";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
             if (_effectsEnabled)
             {
                 FrontBottomLed.Fill = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 245, 158, 11));
@@ -129,7 +207,8 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnAllWhiteClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.SetAllZonesAsync(0xFFFFFF));
+            ConnectionStatus.Text = "Individual colors available through Effects toggle";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
             if (_effectsEnabled)
             {
                 var whiteBrush = new SolidColorBrush(Microsoft.UI.Colors.White);
@@ -145,7 +224,31 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnTurnOffClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.TurnOffAsync());
+            try
+            {
+                var serviceClient = GetServiceClient();
+                var result = await serviceClient.TurnOffAsync();
+                if (result.Success)
+                {
+                    ConnectionStatus.Text = "✅ LEDs turned OFF";
+                    ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightGreen);
+                    _effectsEnabled = false;
+                    EffectsToggle.IsChecked = false;
+                    EffectsToggle.Content = "OFF";
+                    EffectsToggle.Background = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 75, 85, 99));
+                    UpdateLedVisualizations();
+                }
+                else
+                {
+                    ConnectionStatus.Text = $"❌ Turn OFF failed: {result.Message}";
+                    ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Orange);
+                }
+            }
+            catch (Exception ex)
+            {
+                ConnectionStatus.Text = $"🔥 Service error: {ex.Message}";
+                ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Red);
+            }
             if (_effectsEnabled)
             {
                 var offBrush = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 55, 65, 81));
@@ -161,37 +264,15 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnTurnOnClicked(object sender, RoutedEventArgs e)
         {
-            await ExecuteLedCommand(() => _ledController?.TurnOnAsync());
+            ConnectionStatus.Text = "Individual colors available through Effects toggle";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
         }
 
-        private async Task ExecuteLedCommand(Func<Task<Core.Models.LedCommandResult>?> command)
+        private async Task ExecuteLedCommand(Func<Task> command)
         {
-            if (_ledController == null)
-            {
-                ConnectionStatus.Text = "Not connected to NUC";
-                ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Orange);
-                return;
-            }
-
-            try
-            {
-                var result = await command();
-                if (result?.Success == true)
-                {
-                    ConnectionStatus.Text = "Command executed successfully";
-                    ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.LightGreen);
-                }
-                else
-                {
-                    ConnectionStatus.Text = $"Command failed: {result?.Message}";
-                    ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Orange);
-                }
-            }
-            catch (Exception ex)
-            {
-                ConnectionStatus.Text = $"Error: {ex.Message}";
-                ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
-            }
+            // Service client method - no longer needed
+            ConnectionStatus.Text = "Use Effects toggle for LED control";
+            ConnectionStatus.Foreground = new SolidColorBrush(Microsoft.UI.Colors.LightBlue);
         }
     }
 }

@@ -9,6 +9,15 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- Custom Assembly Information for Process Identification -->
+    <AssemblyTitle>NINSS-Console</AssemblyTitle>
+    <Product>Not Intel NUC Software Studio Console</Product>
+    <AssemblyProduct>NINSS-Console</AssemblyProduct>
+    <AssemblyDescription>NINSS Console LED Controller</AssemblyDescription>
+    <AssemblyCompany>NINSS</AssemblyCompany>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
 </Project>

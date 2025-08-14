@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NucLedController.Core\NucLedController.Core.csproj" />
+    <ProjectReference Include="..\NucLedController.Client\NucLedController.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

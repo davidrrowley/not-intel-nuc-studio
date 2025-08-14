@@ -1,4 +1,5 @@
 using NucLedController.Core.Models;
+using NucLedController.Core.Services;
 
 namespace NucLedController.Core.Interfaces;
 
@@ -13,9 +14,24 @@ public interface INucLedController : IDisposable
     bool IsConnected { get; }
     
     /// <summary>
+    /// Gets whether the LEDs are currently enabled/on
+    /// </summary>
+    bool LedsEnabled { get; }
+    
+    /// <summary>
     /// Gets the current connection status message
     /// </summary>
     string ConnectionStatus { get; }
+    
+    /// <summary>
+    /// Gets the state manager for LED configuration persistence
+    /// </summary>
+    LedStateManager StateManager { get; }
+    
+    /// <summary>
+    /// Initialize the controller and load saved state
+    /// </summary>
+    Task InitializeAsync();
     
     /// <summary>
     /// Event raised when connection status changes
@@ -26,6 +42,11 @@ public interface INucLedController : IDisposable
     /// Event raised when status message changes
     /// </summary>
     event EventHandler<string> StatusChanged;
+    
+    /// <summary>
+    /// Event raised when LED state changes (on/off)
+    /// </summary>
+    event EventHandler<bool> LedStateChanged;
     
     /// <summary>
     /// Connect to the NUC LED controller
@@ -61,4 +82,19 @@ public interface INucLedController : IDisposable
     /// Turn on all LEDs with default settings
     /// </summary>
     Task<LedCommandResult> TurnOnAsync();
+    
+    /// <summary>
+    /// Get current LED patterns from hardware (Intel SDK style)
+    /// </summary>
+    Task<LedStatus?> GetCurrentPatternsAsync();
+    
+    /// <summary>
+    /// Update application state from hardware state
+    /// </summary>
+    Task<LedCommandResult> UpdateFromDeviceAsync();
+    
+    /// <summary>
+    /// Enhanced GetCurrentPattern method like Intel SDK
+    /// </summary>
+    Task<LedCommandResult> GetCurrentPatternAsync();
 }

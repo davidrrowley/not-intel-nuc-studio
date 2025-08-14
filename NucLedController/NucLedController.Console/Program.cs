@@ -73,6 +73,7 @@ class Program
                         break;
                     case "Q":
                         await controller.TurnOffAsync();
+                        await controller.DisconnectAsync();
                         return;
                     default:
                         System.Console.WriteLine("Invalid choice.");

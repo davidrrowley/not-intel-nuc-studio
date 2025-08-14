@@ -10,6 +10,8 @@ using Windows.Storage;
 using Windows.Graphics.Imaging;
 using System.Runtime.InteropServices.WindowsRuntime;
 using NucLedController.WinUI3.Helpers;
+using NucLedController.Client;
+using System.Threading.Tasks;
 
 namespace NucLedController.WinUI3.Views
 {
@@ -22,6 +24,11 @@ namespace NucLedController.WinUI3.Views
         private Random _random = new Random();
         private List<Border> _nucElements;
         private List<Border> _gaugeElements;
+        private NucLedServiceClient? _serviceClient; // Service client for LED control
+        private bool _isServiceConnected = false;
+        private bool _effectsEnabled = false;
+        private bool _userToggling = false; // Prevent recursive toggle events
+        private bool _commandInProgress = false; // Prevent concurrent commands
 
         public MainPage()
         {
@@ -51,7 +58,165 @@ namespace NucLedController.WinUI3.Views
             // Initial layout
             ConfigureResponsiveLayout();
             ConfigureResponsiveNucLayout();
+            
+            // Auto-connect to service and setup Effects toggle
+            _ = InitializeServiceConnectionAsync();
+            
             WriteDebugToFile("✅ OnPageLoaded completed!");
+        }
+
+        private async Task InitializeServiceConnectionAsync()
+        {
+            try
+            {
+                WriteDebugToFile("🔌 Initializing service connection...");
+                _serviceClient = new NucLedServiceClient();
+                
+                // Test connection and get current state
+                var (pingSuccess, connected, message) = await _serviceClient.PingAsync();
+                
+                if (pingSuccess && connected)
+                {
+                    WriteDebugToFile("✅ Service connected successfully");
+                    _isServiceConnected = true;
+                    
+                    // Get current hardware state to sync the toggle
+                    var (statusSuccess, status, statusMessage) = await _serviceClient.GetStatusAsync();
+                    if (statusSuccess && status != null)
+                    {
+                        _effectsEnabled = status.ButtonStatus;
+                        
+                        // Update UI on main thread
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            if (EffectsToggle != null)
+                            {
+                                // Remove any existing event handler first to prevent duplicates
+                                EffectsToggle.Toggled -= OnEffectsToggled;
+                                
+                                _userToggling = true;
+                                EffectsToggle.IsOn = _effectsEnabled;
+                                _userToggling = false;
+                                
+                                // Now attach event handler
+                                EffectsToggle.Toggled += OnEffectsToggled;
+                                WriteDebugToFile($"🎯 Effects toggle synced to hardware state: {_effectsEnabled}");
+                            }
+                        });
+                        
+                        await UpdateLedOverlaysAsync(_effectsEnabled);
+                    }
+                }
+                else
+                {
+                    WriteDebugToFile($"❌ Service connection failed: {message}");
+                    _isServiceConnected = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteDebugToFile($"🔥 Service initialization error: {ex.Message}");
+                _isServiceConnected = false;
+            }
+        }
+
+        private async void OnEffectsToggled(object sender, RoutedEventArgs e)
+        {
+            if (_userToggling || !_isServiceConnected || _serviceClient == null || _commandInProgress) 
+            {
+                WriteDebugToFile($"⏸️ Toggle blocked - userToggling:{_userToggling}, connected:{_isServiceConnected}, inProgress:{_commandInProgress}");
+                return;
+            }
+            
+            var isOn = EffectsToggle?.IsOn ?? false;
+            WriteDebugToFile($"🎛️ Effects toggle clicked: {isOn}");
+            
+            _commandInProgress = true;
+            
+            try
+            {
+                if (isOn)
+                {
+                    WriteDebugToFile("🔆 Sending TurnOn command to service...");
+                    var result = await _serviceClient.TurnOnAsync();
+                    if (result.Success)
+                    {
+                        _effectsEnabled = true;
+                        WriteDebugToFile("✅ LEDs turned ON successfully");
+                        await UpdateLedOverlaysAsync(true);
+                    }
+                    else
+                    {
+                        WriteDebugToFile($"❌ TurnOn failed: {result.Message}");
+                        // Revert toggle if command failed
+                        _userToggling = true;
+                        EffectsToggle.IsOn = false;
+                        _userToggling = false;
+                    }
+                }
+                else
+                {
+                    WriteDebugToFile("🔅 Sending TurnOff command to service...");
+                    var result = await _serviceClient.TurnOffAsync();
+                    if (result.Success)
+                    {
+                        _effectsEnabled = false;
+                        WriteDebugToFile("✅ LEDs turned OFF successfully");
+                        await UpdateLedOverlaysAsync(false);
+                    }
+                    else
+                    {
+                        WriteDebugToFile($"❌ TurnOff failed: {result.Message}");
+                        // Revert toggle if command failed
+                        _userToggling = true;
+                        EffectsToggle.IsOn = true;
+                        _userToggling = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteDebugToFile($"🔥 Toggle error: {ex.Message}");
+                // Revert toggle on error
+                _userToggling = true;
+                EffectsToggle.IsOn = !isOn;
+                _userToggling = false;
+            }
+            finally
+            {
+                _commandInProgress = false;
+                WriteDebugToFile($"🏁 Toggle operation completed");
+            }
+        }
+
+        private async Task UpdateLedOverlaysAsync(bool effectsOn)
+        {
+            try
+            {
+                WriteDebugToFile($"🎨 Updating LED overlays - Effects: {effectsOn}");
+                
+                // Find all LED overlay images
+                var overlayImages = new[]
+                {
+                    this.FindName("MainFrontLedOverlayImage") as Image,
+                    this.FindName("MainLeftLedOverlayImage") as Image,
+                    this.FindName("MainRightLedOverlayImage") as Image
+                };
+
+                foreach (var image in overlayImages)
+                {
+                    if (image != null)
+                    {
+                        // Update visibility/opacity based on effects state
+                        image.Opacity = effectsOn ? 0.9 : 0.3;
+                        WriteDebugToFile($"🔅 Updated overlay opacity to {image.Opacity}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteDebugToFile($"🔥 Error updating LED overlays: {ex.Message}");
+            }
         }
 
         private async void InitializeLedOverlays()
