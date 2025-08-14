@@ -79,14 +79,15 @@
                     
                     <!-- NUC Device Views with Responsive Scaling -->
                     <ScrollViewer x:Name="NucScrollViewer" 
-                                  ZoomMode="Disabled" 
-                                  HorizontalScrollMode="Auto" 
-                                  VerticalScrollMode="Disabled"
-                                  HorizontalScrollBarVisibility="Auto" 
-                                  VerticalScrollBarVisibility="Disabled"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  ZoomMode="Disabled"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
                                   SizeChanged="NucScrollViewer_SizeChanged"
-                                  Padding="5">
-                        <Grid x:Name="ResponsiveNucGrid" MinHeight="400" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                  Padding="5"
+                                  MaxHeight="600">
+                        <Grid x:Name="ResponsiveNucGrid" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- Grid definitions will be set dynamically in code-behind for responsive behavior -->
                         
                         <!-- NUC device views with LED zones - Now using responsive sizing -->
@@ -96,7 +97,7 @@
                                 CornerRadius="6" 
                                 Margin="8"
                                 Padding="12"
-                                Width="200" Height="200"
+                                Width="350" Height="350"
                                 BorderBrush="#FF3A4A57"
                                 BorderThickness="1">
                             <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -118,7 +119,7 @@
                                 CornerRadius="6" 
                                 Margin="8"
                                 Padding="12"
-                                Width="200" Height="200"
+                                Width="350" Height="350"
                                 BorderBrush="#FF3A4A57"
                                 BorderThickness="1">
                             <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -140,7 +141,7 @@
                                 CornerRadius="6" 
                                 Margin="8"
                                 Padding="12"
-                                Width="200" Height="200"
+                                Width="350" Height="350"
                                 BorderBrush="#FF3A4A57"
                                 BorderThickness="1">
                             <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

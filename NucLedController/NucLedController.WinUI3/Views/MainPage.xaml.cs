@@ -254,9 +254,9 @@ namespace NucLedController.WinUI3.Views
             var availableWidth = NucScrollViewer.ActualWidth - 20;
             var availableHeight = NucScrollViewer.ActualHeight - 20;
             
-            // Each NUC container needs 216px (200px + 16px margin)
-            const double nucWidth = 216;
-            const double nucHeight = 216;
+            // Each NUC container now needs 366px (350px + 16px margin)
+            const double nucWidth = 366;
+            const double nucHeight = 366;
             
             // Calculate how many columns can fit
             var maxColumns = Math.Max(1, (int)(availableWidth / nucWidth));
