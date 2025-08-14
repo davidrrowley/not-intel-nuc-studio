@@ -147,12 +147,18 @@ public class ZoneState
 }
 
 /// <summary>
+/// <summary>
 /// LED patterns supported by the hardware
 /// </summary>
 public enum LedPattern
 {
+    Off = 0,
     Static = 1,
     Breathing = 2,
-    Pulsing = 3,
-    Rainbow = 4
+    Pulse = 3,
+    Strobing = 4,
+    PulseTrain1 = 5,
+    PulseTrain2 = 6,
+    PulseTrain3 = 7,
+    Rainbow = 8
 }

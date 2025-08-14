@@ -11,363 +11,510 @@
     <Grid Background="#FF1A2332">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- Header with back button -->
-        <StackPanel Grid.Row="0" Margin="30,20,30,20" Orientation="Horizontal">
+        <!-- Header with back button and breadcrumb -->
+        <StackPanel Grid.Row="0" Margin="30,20,30,10" Orientation="Horizontal">
             <Button x:Name="BackButton"
                    Click="OnBackClicked"
                    Background="Transparent"
                    BorderThickness="0"
                    Margin="0,0,20,0">
-                <FontIcon Glyph="&#xE72B;" FontSize="20" Foreground="#FF0EA5E9"/>
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72B;" FontSize="20" Foreground="#FF0EA5E9"/>
             </Button>
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <FontIcon Glyph="&#xE706;" FontSize="24" Foreground="#FFFBBF24"/>
-                    <TextBlock Text="LEDs" 
-                              FontSize="24" 
-                              FontWeight="SemiBold"
-                              Foreground="White"
-                              VerticalAlignment="Center"/>
-                    <FontIcon Glyph="&#xE76C;" FontSize="20" Foreground="#FF0EA5E9" VerticalAlignment="Center"/>
-                </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE80F;" FontSize="16" Foreground="#FF0EA5E9"/>
+                <TextBlock Text="Home" FontSize="14" Foreground="#FF0EA5E9"/>
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE76C;" FontSize="12" Foreground="#FF6B7280"/>
+                <TextBlock Text="LEDs" FontSize="14" Foreground="White"/>
             </StackPanel>
         </StackPanel>
         
-        <!-- Main Content -->
-        <Grid Grid.Row="1" Margin="30,0,30,30">
+        <!-- LED Profiles Header -->
+        <Grid Grid.Row="1" Margin="30,10,30,20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
-            <!-- Left Panel - NUC Views -->
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                
-                <!-- NUC Profile Views -->
-                <Grid Grid.Row="0" Margin="0,0,20,20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Main NUC View (Top/Front) -->
-                    <Border Grid.Row="0" 
-                            Background="#FF2A3441" 
-                            CornerRadius="8"
-                            BorderBrush="#FF374151"
-                            BorderThickness="1"
-                            Padding="20">
-                        <Grid>
-                            <!-- NUC Outline -->
-                            <Border Width="180" Height="180"
-                                   Background="#FF1F2937"
-                                   CornerRadius="8"
-                                   BorderBrush="#FF4B5563"
-                                   BorderThickness="2">
-                                <Grid>
-                                    <!-- Skull LED Zone -->
-                                    <Border x:Name="SkullLed"
-                                           Width="40" Height="40"
-                                           Background="#FF374151"
-                                           CornerRadius="20"
-                                           BorderBrush="#FF6B7280"
-                                           BorderThickness="2"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Top"
-                                           Margin="0,30,0,0">
-                                        <FontIcon Glyph="&#xE7C2;" FontSize="20" Foreground="#FF9CA3AF"/>
-                                    </Border>
-                                    
-                                    <!-- Bottom Left LED -->
-                                    <Ellipse x:Name="BottomLeftLed"
-                                            Width="12" Height="12"
-                                            Fill="#FF374151"
-                                            Stroke="#FF6B7280"
-                                            StrokeThickness="1"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
-                                            Margin="25,0,0,25"/>
-                                    
-                                    <!-- Bottom Right LED -->
-                                    <Ellipse x:Name="BottomRightLed"
-                                            Width="12" Height="12"
-                                            Fill="#FF374151"
-                                            Stroke="#FF6B7280"
-                                            StrokeThickness="1"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Bottom"
-                                            Margin="0,0,25,25"/>
-                                    
-                                    <!-- Front Bottom LED Strip -->
-                                    <Rectangle x:Name="FrontBottomLed"
-                                              Width="80" Height="4"
-                                              Fill="#FF374151"
-                                              RadiusX="2" RadiusY="2"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Bottom"
-                                              Margin="0,0,0,15"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </Border>
-                    
-                    <!-- Side Profile Views -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10">
-                        <!-- Side View 1 -->
-                        <Border Background="#FF2A3441" 
-                               CornerRadius="4"
-                               BorderBrush="#FF374151"
-                               BorderThickness="1"
-                               Padding="15"
-                               Width="80" Height="60">
-                            <Border Background="#FF1F2937"
-                                   CornerRadius="4"
-                                   BorderBrush="#FF4B5563"
-                                   BorderThickness="1">
-                                <Rectangle x:Name="SideLed1"
-                                          Width="40" Height="3"
-                                          Fill="#FF374151"
-                                          RadiusX="1" RadiusY="1"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Bottom"
-                                          Margin="0,0,0,8"/>
-                            </Border>
-                        </Border>
-                        
-                        <!-- Side View 2 -->
-                        <Border Background="#FF2A3441" 
-                               CornerRadius="4"
-                               BorderBrush="#FF374151"
-                               BorderThickness="1"
-                               Padding="15"
-                               Width="80" Height="60">
-                            <Border Background="#FF1F2937"
-                                   CornerRadius="4"
-                                   BorderBrush="#FF4B5563"
-                                   BorderThickness="1">
-                                <Rectangle x:Name="SideLed2"
-                                          Width="40" Height="3"
-                                          Fill="#FF374151"
-                                          RadiusX="1" RadiusY="1"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Bottom"
-                                          Margin="0,0,0,8"/>
-                            </Border>
-                        </Border>
-                        
-                        <!-- Side View 3 -->
-                        <Border Background="#FF2A3441" 
-                               CornerRadius="4"
-                               BorderBrush="#FF374151"
-                               BorderThickness="1"
-                               Padding="15"
-                               Width="80" Height="60">
-                            <Border Background="#FF1F2937"
-                                   CornerRadius="4"
-                                   BorderBrush="#FF4B5563"
-                                   BorderThickness="1">
-                                <Rectangle x:Name="SideLed3"
-                                          Width="40" Height="3"
-                                          Fill="#FF374151"
-                                          RadiusX="1" RadiusY="1"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Bottom"
-                                          Margin="0,0,0,8"/>
-                            </Border>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-                
-                <!-- LED Profile Selector -->
-                <ComboBox Grid.Row="1"
-                         x:Name="ProfileSelector"
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="15">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7C4;" FontSize="24" Foreground="#FFFBBF24"/>
+                <TextBlock Text="LED Profiles:" 
+                          FontSize="18" 
+                          FontWeight="SemiBold"
+                          Foreground="White"
+                          VerticalAlignment="Center"/>
+                <ComboBox x:Name="ProfileSelector"
                          Background="#FF2A3441"
                          Foreground="White"
                          BorderBrush="#FF374151"
-                         Margin="0,0,20,10"
-                         HorizontalAlignment="Stretch">
-                    <ComboBoxItem Content="Default" IsSelected="True"/>
+                         SelectedIndex="0"
+                         MinWidth="120">
+                    <ComboBoxItem Content="Default"/>
                     <ComboBoxItem Content="Gaming"/>
                     <ComboBoxItem Content="Work"/>
                     <ComboBoxItem Content="Custom"/>
                 </ComboBox>
-                
-                <!-- Effects Toggle -->
-                <StackPanel Grid.Row="2" Margin="0,0,20,0">
-                    <TextBlock Text="Effects:" 
-                              FontSize="16" 
-                              FontWeight="SemiBold"
+                <TextBlock Text="Edit..." 
+                          FontSize="14" 
+                          Foreground="#FF0EA5E9"
+                          VerticalAlignment="Center"
+                          Margin="5,0,0,0"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <Button Content="Reset"
+                       Background="#FF0EA5E9"
+                       Foreground="White"
+                       BorderThickness="0"
+                       Padding="12,6"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Enable LEDs:" 
+                              FontSize="14" 
                               Foreground="White"
-                              Margin="0,0,0,10"/>
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <ToggleButton x:Name="EffectsToggle"
-                                     Content="OFF"
-                                     Click="OnEffectsToggled"
-                                     Width="60" Height="30"
-                                     Background="#FF4B5563"
-                                     Foreground="White"
-                                     BorderThickness="0"
-                                     CornerRadius="15"/>
-                        <ToggleButton Content="ON"
-                                     Width="60" Height="30"
-                                     Background="#FF0EA5E9"
-                                     Foreground="White"
-                                     BorderThickness="0"
-                                     CornerRadius="15"
-                                     IsChecked="False"/>
-                    </StackPanel>
+                              VerticalAlignment="Center"/>
+                    <ToggleSwitch x:Name="MasterEnableToggle"
+                                 OnContent="ON" 
+                                 OffContent="OFF"
+                                 IsOn="True"
+                                 Toggled="OnMasterToggled"/>
                 </StackPanel>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Row="2" Margin="30,0,30,30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- NUC Visual Display -->
+            <Grid Grid.Row="0" Height="200" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Left Side View -->
+                <Border Grid.Column="0" 
+                       Background="#FF2A3441" 
+                       CornerRadius="8"
+                       BorderBrush="#FF374151"
+                       BorderThickness="1"
+                       Margin="10"
+                       Padding="20">
+                    <Grid>
+                        <!-- NUC Left Side Image Placeholder -->
+                        <Border Width="120" Height="120"
+                               Background="#FF1F2937"
+                               CornerRadius="8"
+                               BorderBrush="#FF4B5563"
+                               BorderThickness="2">
+                            <Grid>
+                                <!-- Left side LED strip -->
+                                <Rectangle x:Name="LeftSideLedVisual"
+                                          Width="80" Height="4"
+                                          Fill="#FF374151"
+                                          RadiusX="2" RadiusY="2"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Bottom"
+                                          Margin="0,0,0,15"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+                
+                <!-- Front View -->
+                <Border Grid.Column="1" 
+                       Background="#FF2A3441" 
+                       CornerRadius="8"
+                       BorderBrush="#FF374151"
+                       BorderThickness="1"
+                       Margin="10"
+                       Padding="20">
+                    <Grid>
+                        <!-- NUC Front View -->
+                        <Border Width="120" Height="120"
+                               Background="#FF1F2937"
+                               CornerRadius="8"
+                               BorderBrush="#FF4B5563"
+                               BorderThickness="2">
+                            <Grid>
+                                <!-- Skull LED Zone -->
+                                <Border x:Name="SkullLedVisual"
+                                       Width="30" Height="30"
+                                       Background="#FF374151"
+                                       CornerRadius="15"
+                                       BorderBrush="#FF6B7280"
+                                       BorderThickness="2"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Top"
+                                       Margin="0,20,0,0">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7C2;" FontSize="16" Foreground="#FF9CA3AF"/>
+                                </Border>
+                                
+                                <!-- Front Bottom LED Strip -->
+                                <Rectangle x:Name="FrontBottomLedVisual"
+                                          Width="80" Height="4"
+                                          Fill="#FF374151"
+                                          RadiusX="2" RadiusY="2"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Bottom"
+                                          Margin="0,0,0,15"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+                
+                <!-- Right Side View -->
+                <Border Grid.Column="2" 
+                       Background="#FF2A3441" 
+                       CornerRadius="8"
+                       BorderBrush="#FF374151"
+                       BorderThickness="1"
+                       Margin="10"
+                       Padding="20">
+                    <Grid>
+                        <!-- NUC Right Side Image Placeholder -->
+                        <Border Width="120" Height="120"
+                               Background="#FF1F2937"
+                               CornerRadius="8"
+                               BorderBrush="#FF4B5563"
+                               BorderThickness="2">
+                            <Grid>
+                                <!-- Right side LED strip -->
+                                <Rectangle x:Name="RightSideLedVisual"
+                                          Width="80" Height="4"
+                                          Fill="#FF374151"
+                                          RadiusX="2" RadiusY="2"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Bottom"
+                                          Margin="0,0,0,15"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
             </Grid>
             
-            <!-- Right Panel - Controls -->
-            <ScrollViewer Grid.Column="1" Margin="20,0,0,0">
-                <StackPanel Spacing="20">
+            <!-- Master-Detail Layout -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Left Panel - Zone List -->
+                <Border Grid.Column="0" 
+                       Background="#FF2A3441" 
+                       CornerRadius="8,0,0,8"
+                       BorderBrush="#FF374151"
+                       BorderThickness="1,1,0,1"
+                       Padding="0">
                     
-                    <!-- Connection Status -->
-                    <Border Background="#FF2A3441" 
-                            CornerRadius="8"
-                            Padding="20"
-                            BorderBrush="#FF374151"
-                            BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="Connection Status" 
-                                      FontSize="16" 
-                                      FontWeight="SemiBold"
-                                      Foreground="White"
-                                      Margin="0,0,0,10"/>
-                            <TextBlock x:Name="ConnectionStatus"
-                                      Text="Disconnected" 
-                                      FontSize="14" 
-                                      Foreground="#FFEF4444"
-                                      Margin="0,0,0,15"/>
-                            <Button x:Name="ConnectButton"
-                                   Content="Connect to NUC"
-                                   Click="OnConnectClicked"
-                                   Background="#FF0EA5E9"
-                                   Foreground="White"
-                                   BorderThickness="0"
-                                   Padding="15,8"
-                                   CornerRadius="4"
-                                   HorizontalAlignment="Left"/>
-                        </StackPanel>
-                    </Border>
-                    
-                    <!-- LED Zone Controls -->
-                    <Border Background="#FF2A3441" 
-                            CornerRadius="8"
-                            Padding="20"
-                            BorderBrush="#FF374151"
-                            BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="LED Zone Controls" 
-                                      FontSize="16" 
-                                      FontWeight="SemiBold"
-                                      Foreground="White"
-                                      Margin="0,0,0,15"/>
-                            
-                            <Grid>
+                    <ListView x:Name="ZoneList" 
+                             Background="Transparent"
+                             SelectionMode="Single"
+                             SelectedIndex="0"
+                             SelectionChanged="OnZoneSelectionChanged">
+                        
+                        <!-- Skull Zone -->
+                        <ListViewItem x:Name="SkullZoneItem" Tag="Skull">
+                            <Grid Margin="15,10" Height="40">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="15"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Skull" 
+                                              FontSize="14" 
+                                              FontWeight="SemiBold"
+                                              Foreground="#FF0EA5E9"/>
+                                    <TextBlock x:Name="SkullStatus"
+                                              Text="Solid" 
+                                              FontSize="12" 
+                                              Foreground="#FF9CA3AF"/>
+                                </StackPanel>
+                                <Rectangle Grid.Column="1" 
+                                          x:Name="SkullIndicator"
+                                          Width="4" Height="30"
+                                          Fill="#FFEF4444"
+                                          RadiusX="2" RadiusY="2"/>
+                            </Grid>
+                        </ListViewItem>
+                        
+                        <!-- Bottom Front Zone -->
+                        <ListViewItem x:Name="BottomFrontZoneItem" Tag="FrontBottom">
+                            <Grid Margin="15,10" Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Bottom Front" 
+                                              FontSize="14" 
+                                              FontWeight="SemiBold"
+                                              Foreground="#FF0EA5E9"/>
+                                    <TextBlock x:Name="BottomFrontStatus"
+                                              Text="Solid" 
+                                              FontSize="12" 
+                                              Foreground="#FF9CA3AF"/>
+                                </StackPanel>
+                                <Rectangle Grid.Column="1" 
+                                          x:Name="BottomFrontIndicator"
+                                          Width="4" Height="30"
+                                          Fill="#FFEF4444"
+                                          RadiusX="2" RadiusY="2"/>
+                            </Grid>
+                        </ListViewItem>
+                        
+                        <!-- Bottom Right Zone -->
+                        <ListViewItem x:Name="BottomRightZoneItem" Tag="BottomRight">
+                            <Grid Margin="15,10" Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Bottom Right" 
+                                              FontSize="14" 
+                                              FontWeight="SemiBold"
+                                              Foreground="#FF0EA5E9"/>
+                                    <TextBlock x:Name="BottomRightStatus"
+                                              Text="Solid" 
+                                              FontSize="12" 
+                                              Foreground="#FF9CA3AF"/>
+                                </StackPanel>
+                                <Rectangle Grid.Column="1" 
+                                          x:Name="BottomRightIndicator"
+                                          Width="4" Height="30"
+                                          Fill="#FFEF4444"
+                                          RadiusX="2" RadiusY="2"/>
+                            </Grid>
+                        </ListViewItem>
+                        
+                        <!-- Bottom Left Zone -->
+                        <ListViewItem x:Name="BottomLeftZoneItem" Tag="BottomLeft">
+                            <Grid Margin="15,10" Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Bottom Left" 
+                                              FontSize="14" 
+                                              FontWeight="SemiBold"
+                                              Foreground="#FF0EA5E9"/>
+                                    <TextBlock x:Name="BottomLeftStatus"
+                                              Text="Solid" 
+                                              FontSize="12" 
+                                              Foreground="#FF9CA3AF"/>
+                                </StackPanel>
+                                <Rectangle Grid.Column="1" 
+                                          x:Name="BottomLeftIndicator"
+                                          Width="4" Height="30"
+                                          Fill="#FFEF4444"
+                                          RadiusX="2" RadiusY="2"/>
+                            </Grid>
+                        </ListViewItem>
+                        
+                    </ListView>
+                </Border>
+                
+                <!-- Right Panel - Zone Controls -->
+                <Border Grid.Column="1" 
+                       Background="#FF2A3441" 
+                       CornerRadius="0,8,8,0"
+                       BorderBrush="#FF374151"
+                       BorderThickness="1"
+                       Padding="30">
+                    
+                    <ScrollViewer>
+                        <StackPanel x:Name="ZoneControlPanel" Spacing="25">
+                            
+                            <!-- Zone Title -->
+                            <TextBlock x:Name="ZoneTitle" 
+                                      Text="Skull" 
+                                      FontSize="24" 
+                                      FontWeight="SemiBold"
+                                      Foreground="White"/>
+                            
+                            <!-- Pattern Selection -->
+                            <StackPanel>
+                                <TextBlock Text="Pattern:" 
+                                          FontSize="14" 
+                                          Foreground="White"
+                                          Margin="0,0,0,8"/>
+                                <ComboBox x:Name="PatternSelector"
+                                         Background="#FF1F2937"
+                                         Foreground="White"
+                                         BorderBrush="#FF374151"
+                                         SelectedIndex="1"
+                                         MinWidth="200"
+                                         SelectionChanged="OnPatternChanged">
+                                    <ComboBoxItem Content="Off" Tag="Off"/>
+                                    <ComboBoxItem Content="Solid" Tag="Static"/>
+                                    <ComboBoxItem Content="Pulse" Tag="Pulse"/>
+                                    <ComboBoxItem Content="Breathing" Tag="Breathing"/>
+                                    <ComboBoxItem Content="Strobing" Tag="Strobing"/>
+                                    <ComboBoxItem Content="PulseTrain1" Tag="PulseTrain1"/>
+                                    <ComboBoxItem Content="PulseTrain2" Tag="PulseTrain2"/>
+                                    <ComboBoxItem Content="PulseTrain3" Tag="PulseTrain3"/>
+                                    <ComboBoxItem Content="Rainbow1" Tag="Rainbow"/>
+                                </ComboBox>
+                            </StackPanel>
+                            
+                            <!-- Control Row 1: Rainbow Toggle + Brightness -->
+                            <Grid x:Name="ControlRow1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
                                 
-                                <!-- Skull Zone -->
-                                <StackPanel Grid.Column="0" Grid.Row="0">
-                                    <TextBlock Text="Skull Zone" Foreground="White" FontSize="14" Margin="0,0,0,8"/>
-                                    <Button Content="Set Red" 
-                                           Click="OnSkullRedClicked" 
-                                           Background="#FFEF4444"
-                                           Foreground="White"
-                                           BorderThickness="0"
-                                           Padding="12,6"
-                                           CornerRadius="4"
-                                           HorizontalAlignment="Stretch"/>
+                                <!-- Rainbow Toggle -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Rainbow:" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <ToggleSwitch x:Name="RainbowToggle"
+                                                 OnContent="ON" 
+                                                 OffContent="OFF"
+                                                 IsOn="False"/>
                                 </StackPanel>
                                 
-                                <!-- Bottom Left Zone -->
-                                <StackPanel Grid.Column="1" Grid.Row="0">
-                                    <TextBlock Text="Bottom Left" Foreground="White" FontSize="14" Margin="0,0,0,8"/>
-                                    <Button Content="Set Green" 
-                                           Click="OnBottomLeftGreenClicked" 
-                                           Background="#FF10B981"
-                                           Foreground="White"
-                                           BorderThickness="0"
-                                           Padding="12,6"
-                                           CornerRadius="4"
-                                           HorizontalAlignment="Stretch"/>
+                                <!-- Brightness Slider -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Brightness:" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <Slider x:Name="BrightnessSlider"
+                                           Minimum="0" 
+                                           Maximum="5" 
+                                           Value="5"
+                                           Width="200"
+                                           ValueChanged="OnBrightnessChanged"/>
                                 </StackPanel>
                                 
-                                <!-- Bottom Right Zone -->
-                                <StackPanel Grid.Column="0" Grid.Row="2">
-                                    <TextBlock Text="Bottom Right" Foreground="White" FontSize="14" Margin="0,0,0,8"/>
-                                    <Button Content="Set Blue" 
-                                           Click="OnBottomRightBlueClicked" 
-                                           Background="#FF3B82F6"
-                                           Foreground="White"
-                                           BorderThickness="0"
-                                           Padding="12,6"
-                                           CornerRadius="4"
-                                           HorizontalAlignment="Stretch"/>
-                                </StackPanel>
-                                
-                                <!-- Front Bottom Zone -->
-                                <StackPanel Grid.Column="1" Grid.Row="2">
-                                    <TextBlock Text="Front Bottom" Foreground="White" FontSize="14" Margin="0,0,0,8"/>
-                                    <Button Content="Set Yellow" 
-                                           Click="OnFrontBottomYellowClicked" 
-                                           Background="#FFF59E0B"
-                                           Foreground="White"
-                                           BorderThickness="0"
-                                           Padding="12,6"
-                                           CornerRadius="4"
-                                           HorizontalAlignment="Stretch"/>
+                                <!-- Frequency Slider (Hidden by default) -->
+                                <StackPanel Grid.Column="4" x:Name="FrequencyPanel" Visibility="Collapsed">
+                                    <TextBlock Text="Frequency:" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <Slider x:Name="FrequencySlider"
+                                           Minimum="0" 
+                                           Maximum="5" 
+                                           Value="3"
+                                           Width="200"/>
                                 </StackPanel>
                             </Grid>
                             
-                            <!-- Global Controls -->
-                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,20,0,0">
-                                <Button Content="All White" 
-                                       Click="OnAllWhiteClicked" 
-                                       Background="#FF6B7280"
-                                       Foreground="White"
-                                       BorderThickness="0"
-                                       Padding="12,6"
-                                       CornerRadius="4"/>
-                                <Button Content="Turn Off" 
-                                       Click="OnTurnOffClicked" 
-                                       Background="#FF4B5563"
-                                       Foreground="White"
-                                       BorderThickness="0"
-                                       Padding="12,6"
-                                       CornerRadius="4"/>
-                                <Button Content="Turn On" 
-                                       Click="OnTurnOnClicked" 
-                                       Background="#FF0EA5E9"
-                                       Foreground="White"
-                                       BorderThickness="0"
-                                       Padding="12,6"
-                                       CornerRadius="4"/>
+                            <!-- Color Controls -->
+                            <StackPanel x:Name="ColorControlsPanel">
+                                
+                                <!-- Color 1 -->
+                                <StackPanel x:Name="Color1Panel" Margin="0,0,0,15">
+                                    <TextBlock Text="Color 1" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <Rectangle x:Name="Color1Display"
+                                              Width="200" Height="30"
+                                              Fill="#FFEF4444"
+                                              RadiusX="4" RadiusY="4"
+                                              Stroke="#FF6B7280"
+                                              StrokeThickness="1"/>
+                                </StackPanel>
+                                
+                                <!-- Color 2 (Hidden by default) -->
+                                <StackPanel x:Name="Color2Panel" Margin="0,0,0,15" Visibility="Collapsed">
+                                    <TextBlock Text="Color 2" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <Rectangle x:Name="Color2Display"
+                                              Width="200" Height="30"
+                                              Fill="#FF10B981"
+                                              RadiusX="4" RadiusY="4"
+                                              Stroke="#FF6B7280"
+                                              StrokeThickness="1"/>
+                                </StackPanel>
+                                
+                                <!-- Color 3 (Hidden by default) -->
+                                <StackPanel x:Name="Color3Panel" Margin="0,0,0,15" Visibility="Collapsed">
+                                    <TextBlock Text="Color 3" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <Rectangle x:Name="Color3Display"
+                                              Width="200" Height="30"
+                                              Fill="#FF3B82F6"
+                                              RadiusX="4" RadiusY="4"
+                                              Stroke="#FF6B7280"
+                                              StrokeThickness="1"/>
+                                </StackPanel>
+                                
                             </StackPanel>
+                            
+                            <!-- Color Palettes -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Standard Colors -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Standard colors:" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="5" x:Name="StandardColorsPanel">
+                                        <Border Width="25" Height="25" Background="#FFEF4444" CornerRadius="3" Tag="16711680"/>
+                                        <Border Width="25" Height="25" Background="#FFF97316" CornerRadius="3" Tag="16744192"/>
+                                        <Border Width="25" Height="25" Background="#FFFBBF24" CornerRadius="3" Tag="16768768"/>
+                                        <Border Width="25" Height="25" Background="#FF10B981" CornerRadius="3" Tag="65280"/>
+                                        <Border Width="25" Height="25" Background="#FF3B82F6" CornerRadius="3" Tag="255"/>
+                                        <Border Width="25" Height="25" Background="#FF8B5CF6" CornerRadius="3" Tag="8388863"/>
+                                        <Border Width="25" Height="25" Background="#FFEC4899" CornerRadius="3" Tag="16711935"/>
+                                        <Border Width="25" Height="25" Background="#FF6B7280" CornerRadius="3" Tag="8421504"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                
+                                <!-- Recent Colors -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Recent colors:" 
+                                              FontSize="14" 
+                                              Foreground="White"
+                                              Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="5" x:Name="RecentColorsPanel">
+                                        <Border Width="25" Height="25" Background="#FFEF4444" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FFF97316" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FFFBBF24" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FF10B981" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FF3B82F6" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FF8B5CF6" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FFEC4899" CornerRadius="3"/>
+                                        <Border Width="25" Height="25" Background="#FF6B7280" CornerRadius="3"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                            
                         </StackPanel>
-                    </Border>
-                    
-                </StackPanel>
-            </ScrollViewer>
+                    </ScrollViewer>
+                </Border>
+                
+            </Grid>
+            
         </Grid>
     </Grid>
 </Page>

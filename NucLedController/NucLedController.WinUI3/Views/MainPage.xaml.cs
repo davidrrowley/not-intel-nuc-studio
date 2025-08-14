@@ -587,7 +587,17 @@ namespace NucLedController.WinUI3.Views
 
         private void OnLedsClicked(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(LedsPage));
+            try
+            {
+                WriteDebugToFile("🔧 LED button clicked - attempting navigation to LedsPage");
+                bool result = Frame.Navigate(typeof(LedsPage));
+                WriteDebugToFile($"🔧 Navigation result: {result}");
+            }
+            catch (Exception ex)
+            {
+                WriteDebugToFile($"💥 Navigation error: {ex.Message}");
+                WriteDebugToFile($"💥 Stack trace: {ex.StackTrace}");
+            }
         }
 
         private void OnPerformanceClicked(object sender, RoutedEventArgs e)
