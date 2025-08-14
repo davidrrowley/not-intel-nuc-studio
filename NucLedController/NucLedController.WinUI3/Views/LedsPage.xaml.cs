@@ -389,10 +389,18 @@ namespace NucLedController.WinUI3.Views
 
         private async void OnStandardColorClicked(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
+            WriteDebugToFile($"🎨 OnStandardColorClicked - sender type: {sender?.GetType().Name}");
+            
             if (sender is Border border && border.Tag is string colorValue)
             {
+                WriteDebugToFile($"🎨 Color value from Tag: '{colorValue}', selected zone: {_selectedZone}");
                 var color = int.Parse(colorValue);
+                WriteDebugToFile($"🎨 Parsed color int: {color}");
                 await SetActiveColor(color);
+            }
+            else
+            {
+                WriteDebugToFile($"🎨 Failed to get color - border: {sender is Border}, tag: {(sender as Border)?.Tag}, tag type: {(sender as Border)?.Tag?.GetType().Name}");
             }
         }
 
@@ -417,6 +425,8 @@ namespace NucLedController.WinUI3.Views
 
         private async Task SetActiveColor(int color)
         {
+            WriteDebugToFile($"🎨 SetActiveColor called with color: {color}, zone: {_selectedZone}");
+            
             var zoneState = _zoneStates[_selectedZone];
             
             // Set the appropriate color based on pattern
@@ -431,6 +441,7 @@ namespace NucLedController.WinUI3.Views
                 zoneState.Color1 = color;
             }
 
+            WriteDebugToFile($"🎨 Zone state updated - Color1: {zoneState.Color1}, Pattern: {zoneState.Pattern}");
             UpdateColorDisplays(zoneState);
             await ApplyZoneChanges();
         }
@@ -463,15 +474,18 @@ namespace NucLedController.WinUI3.Views
             try
             {
                 var zoneState = _zoneStates[_selectedZone];
+                WriteDebugToFile($"🎨 ApplyZoneChanges - Zone: {_selectedZone}, Pattern: {zoneState.Pattern}, Color1: {zoneState.Color1}, Enabled: {zoneState.Enabled}");
                 
                 if (zoneState.Pattern == LedPattern.Off || !zoneState.Enabled)
                 {
                     // Turn off the zone
+                    WriteDebugToFile($"🎨 Turning off zone {_selectedZone}");
                     await _serviceClient.SetZoneColorAsync(_selectedZone, 0);
                 }
                 else
                 {
                     // Apply color and brightness (Client doesn't support separate brightness parameter)
+                    WriteDebugToFile($"🎨 Setting zone {_selectedZone} to color {zoneState.Color1}");
                     await _serviceClient.SetZoneColorAsync(_selectedZone, zoneState.Color1);
                 }
 
@@ -480,6 +494,7 @@ namespace NucLedController.WinUI3.Views
             }
             catch (Exception ex)
             {
+                WriteDebugToFile($"💥 Apply zone changes failed: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Apply zone changes failed: {ex.Message}");
             }
         }

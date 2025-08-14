@@ -401,8 +401,29 @@ public class NucLedService : BackgroundService
                 };
             }
 
-            var zone = (LedZone)Convert.ToInt32(zoneObj);
-            var colorValue = Convert.ToInt32(colorObj);
+            // Handle JsonElement values properly
+            int zoneValue;
+            int colorValue;
+            
+            if (zoneObj is JsonElement zoneElement)
+            {
+                zoneValue = zoneElement.GetInt32();
+            }
+            else
+            {
+                zoneValue = Convert.ToInt32(zoneObj);
+            }
+            
+            if (colorObj is JsonElement colorElement)
+            {
+                colorValue = colorElement.GetInt32();
+            }
+            else
+            {
+                colorValue = Convert.ToInt32(colorObj);
+            }
+
+            var zone = (LedZone)zoneValue;
 
             var result = await _ledController!.SetZoneColorAsync(zone, colorValue);
             _logger.LogInformation("🎨 Set color result: {Success} - {Message}", result.Success, result.Message);

@@ -479,14 +479,14 @@
                                               Foreground="White"
                                               Margin="0,0,0,8"/>
                                     <StackPanel Orientation="Horizontal" Spacing="5" x:Name="StandardColorsPanel">
-                                        <Border Width="25" Height="25" Background="#FFEF4444" CornerRadius="3" Tag="16711680"/>
-                                        <Border Width="25" Height="25" Background="#FFF97316" CornerRadius="3" Tag="16744192"/>
-                                        <Border Width="25" Height="25" Background="#FFFBBF24" CornerRadius="3" Tag="16768768"/>
-                                        <Border Width="25" Height="25" Background="#FF10B981" CornerRadius="3" Tag="65280"/>
-                                        <Border Width="25" Height="25" Background="#FF3B82F6" CornerRadius="3" Tag="255"/>
-                                        <Border Width="25" Height="25" Background="#FF8B5CF6" CornerRadius="3" Tag="8388863"/>
-                                        <Border Width="25" Height="25" Background="#FFEC4899" CornerRadius="3" Tag="16711935"/>
-                                        <Border Width="25" Height="25" Background="#FF6B7280" CornerRadius="3" Tag="8421504"/>
+                                        <Border Width="25" Height="25" Background="#FFFF0000" CornerRadius="3" Tag="16711680"/>
+                                        <Border Width="25" Height="25" Background="#FFFF8000" CornerRadius="3" Tag="16753920"/>
+                                        <Border Width="25" Height="25" Background="#FFFFFF00" CornerRadius="3" Tag="16776960"/>
+                                        <Border Width="25" Height="25" Background="#FF00FF00" CornerRadius="3" Tag="65280"/>
+                                        <Border Width="25" Height="25" Background="#FF0000FF" CornerRadius="3" Tag="255"/>
+                                        <Border Width="25" Height="25" Background="#FFFF00FF" CornerRadius="3" Tag="16711935"/>
+                                        <Border Width="25" Height="25" Background="#FF00FFFF" CornerRadius="3" Tag="65535"/>
+                                        <Border Width="25" Height="25" Background="#FFFFFFFF" CornerRadius="3" Tag="16777215"/>
                                     </StackPanel>
                                 </StackPanel>
                                 
