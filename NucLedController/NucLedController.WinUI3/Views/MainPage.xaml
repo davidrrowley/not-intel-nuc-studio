@@ -105,16 +105,14 @@
                                 Margin="2"
                                 Padding="8">
                             <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                                <Grid Width="400" Height="300">
+                                <Grid>
                                     <!-- Base NUC device image -->
                                     <Image Source="ms-appx:///Assets/NucImages/nuc_front_base.png"
-                                           Width="400" Height="300"
-                                           Stretch="Fill"/>
+                                           Stretch="Uniform"/>
                                     
                                     <!-- LED overlay using mask image -->
                                     <Image x:Name="MainFrontLedOverlayImage"
-                                           Width="400" Height="300"
-                                           Stretch="Fill"/>
+                                           Stretch="Uniform"/>
                                 </Grid>
                             </Viewbox>
                         </Border>
@@ -127,16 +125,14 @@
                                 Margin="2"
                                 Padding="8">
                             <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                                <Grid Width="400" Height="300">
+                                <Grid>
                                     <!-- Base NUC device image -->
                                     <Image Source="ms-appx:///Assets/NucImages/nuc_left_base.png"
-                                           Width="400" Height="300"
-                                           Stretch="Fill"/>
+                                           Stretch="Uniform"/>
                                     
                                     <!-- LED overlay using mask image -->
                                     <Image x:Name="MainLeftLedOverlayImage"
-                                           Width="400" Height="300"
-                                           Stretch="Fill"/>
+                                           Stretch="Uniform"/>
                                 </Grid>
                             </Viewbox>
                         </Border>
@@ -149,16 +145,14 @@
                                 Margin="2"
                                 Padding="8">
                             <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                                <Grid Width="400" Height="300">
+                                <Grid>
                                     <!-- Base NUC device image -->
                                     <Image Source="ms-appx:///Assets/NucImages/nuc_right_base.png"
-                                           Width="400" Height="300"
-                                           Stretch="Fill"/>
+                                           Stretch="Uniform"/>
                                     
                                     <!-- LED overlay using mask image -->
                                     <Image x:Name="MainRightLedOverlayImage"
-                                           Width="400" Height="300"
-                                           Stretch="Fill"/>
+                                           Stretch="Uniform"/>
                                 </Grid>
                             </Viewbox>
                         </Border>
