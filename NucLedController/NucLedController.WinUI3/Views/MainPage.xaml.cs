@@ -10,8 +10,10 @@ using Windows.Storage;
 using Windows.Graphics.Imaging;
 using System.Runtime.InteropServices.WindowsRuntime;
 using NucLedController.WinUI3.Helpers;
-using NucLedController.Client;
 using System.Threading.Tasks;
+using NucLedController.WinUI3.Services;
+
+#nullable enable
 
 namespace NucLedController.WinUI3.Views
 {
@@ -20,12 +22,10 @@ namespace NucLedController.WinUI3.Views
     /// </summary>
     public partial class MainPage : Page
     {
-        private DispatcherTimer _animationTimer;
+        private DispatcherTimer? _animationTimer;
         private Random _random = new Random();
-        private List<Border> _nucElements;
-        private List<Border> _gaugeElements;
-        private NucLedServiceClient? _serviceClient; // Service client for LED control
-        private bool _isServiceConnected = false;
+        private List<Border>? _nucElements;
+        private List<Border>? _gaugeElements;
         private bool _effectsEnabled = false;
         private bool _userToggling = false; // Prevent recursive toggle events
         private bool _commandInProgress = false; // Prevent concurrent commands
@@ -42,7 +42,12 @@ namespace NucLedController.WinUI3.Views
         {
             try
             {
-                var debugFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NucLedDebug.txt");
+                var debugFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "logs", "NucLedDebug.txt");
+                var logsDirectory = Path.GetDirectoryName(debugFile);
+                if (logsDirectory != null && !Directory.Exists(logsDirectory))
+                {
+                    Directory.CreateDirectory(logsDirectory);
+                }
                 File.AppendAllText(debugFile, $"{DateTime.Now:HH:mm:ss.fff} - {message}\n");
             }
             catch { /* ignore file errors */ }
@@ -69,22 +74,21 @@ namespace NucLedController.WinUI3.Views
         {
             try
             {
-                WriteDebugToFile("🔌 Initializing service connection...");
-                _serviceClient = new NucLedServiceClient();
+                WriteDebugToFile("🔌 Initializing NINLCS service connection via singleton...");
                 
                 // Test connection and get current state
-                var (pingSuccess, connected, message) = await _serviceClient.PingAsync();
+                var connectResult = await LedServiceManager.Instance.EnsureConnectedAsync();
                 
-                if (pingSuccess && connected)
+                if (connectResult.Success)
                 {
-                    WriteDebugToFile("✅ Service connected successfully");
-                    _isServiceConnected = true;
+                    WriteDebugToFile("✅ NINLCS service connected successfully via singleton");
                     
                     // Get current hardware state to sync the toggle
-                    var (statusSuccess, status, statusMessage) = await _serviceClient.GetStatusAsync();
-                    if (statusSuccess && status != null)
+                    var statusResult = await LedServiceManager.Instance.GetStatusAsync();
+                    if (statusResult.Success)
                     {
-                        _effectsEnabled = status.ButtonStatus;
+                        // For now, assume LEDs are off initially - we can improve this later
+                        _effectsEnabled = false;
                         
                         // Update UI on main thread
                         DispatcherQueue.TryEnqueue(() =>
@@ -109,22 +113,20 @@ namespace NucLedController.WinUI3.Views
                 }
                 else
                 {
-                    WriteDebugToFile($"❌ Service connection failed: {message}");
-                    _isServiceConnected = false;
+                    WriteDebugToFile($"❌ NINLCS service connection failed: {connectResult.Message}");
                 }
             }
             catch (Exception ex)
             {
-                WriteDebugToFile($"🔥 Service initialization error: {ex.Message}");
-                _isServiceConnected = false;
+                WriteDebugToFile($"🔥 NINLCS service initialization error: {ex.Message}");
             }
         }
 
         private async void OnEffectsToggled(object sender, RoutedEventArgs e)
         {
-            if (_userToggling || !_isServiceConnected || _serviceClient == null || _commandInProgress) 
+            if (_userToggling || _commandInProgress) 
             {
-                WriteDebugToFile($"⏸️ Toggle blocked - userToggling:{_userToggling}, connected:{_isServiceConnected}, inProgress:{_commandInProgress}");
+                WriteDebugToFile($"⏸️ Toggle blocked - userToggling:{_userToggling}, inProgress:{_commandInProgress}");
                 return;
             }
             
@@ -137,8 +139,9 @@ namespace NucLedController.WinUI3.Views
             {
                 if (isOn)
                 {
-                    WriteDebugToFile("🔆 Sending TurnOn command to service...");
-                    var result = await _serviceClient.TurnOnAsync();
+                    WriteDebugToFile("🔆 Sending SetAllZones command to NINLCS service...");
+                    // Turn on all zones with solid blue color at 100% brightness
+                    var result = await LedServiceManager.Instance.SetAllZonesAsync("Solid", "Blue", 100, false);
                     if (result.Success)
                     {
                         _effectsEnabled = true;
@@ -156,8 +159,8 @@ namespace NucLedController.WinUI3.Views
                 }
                 else
                 {
-                    WriteDebugToFile("🔅 Sending TurnOff command to service...");
-                    var result = await _serviceClient.TurnOffAsync();
+                    WriteDebugToFile("🔅 Sending TurnOffAll command to NINLCS service...");
+                    var result = await LedServiceManager.Instance.TurnOffAllAsync();
                     if (result.Success)
                     {
                         _effectsEnabled = false;
@@ -589,7 +592,7 @@ namespace NucLedController.WinUI3.Views
         {
             try
             {
-                WriteDebugToFile("🔧 LED button clicked - attempting navigation to LedsPage");
+                WriteDebugToFile("🔧 LED button clicked - navigating to LedsPage");
                 bool result = Frame.Navigate(typeof(LedsPage));
                 WriteDebugToFile($"🔧 Navigation result: {result}");
             }

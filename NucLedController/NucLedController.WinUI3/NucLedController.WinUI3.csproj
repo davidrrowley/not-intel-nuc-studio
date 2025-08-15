@@ -43,9 +43,11 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
+  <!-- Remove old broken client dependency
   <ItemGroup>
     <ProjectReference Include="..\NucLedController.Client\NucLedController.Client.csproj" />
   </ItemGroup>
+  -->
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />

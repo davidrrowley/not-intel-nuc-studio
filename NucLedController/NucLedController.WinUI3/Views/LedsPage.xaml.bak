@@ -247,7 +247,7 @@
                         </ListViewItem>
                         
                         <!-- Bottom Front Zone -->
-                        <ListViewItem x:Name="BottomFrontZoneItem" Tag="BottomFront">
+                        <ListViewItem x:Name="BottomFrontZoneItem" Tag="FrontBottom">
                             <Grid Margin="15,10" Height="40">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -356,14 +356,14 @@
                                          MinWidth="200"
                                          SelectionChanged="OnPatternChanged">
                                     <ComboBoxItem Content="Off" Tag="Off"/>
-                                    <ComboBoxItem Content="Solid" Tag="Solid"/>
+                                    <ComboBoxItem Content="Solid" Tag="Static"/>
                                     <ComboBoxItem Content="Pulse" Tag="Pulse"/>
                                     <ComboBoxItem Content="Breathing" Tag="Breathing"/>
                                     <ComboBoxItem Content="Strobing" Tag="Strobing"/>
                                     <ComboBoxItem Content="PulseTrain1" Tag="PulseTrain1"/>
                                     <ComboBoxItem Content="PulseTrain2" Tag="PulseTrain2"/>
                                     <ComboBoxItem Content="PulseTrain3" Tag="PulseTrain3"/>
-                                    <ComboBoxItem Content="Rainbow" Tag="Rainbow"/>
+                                    <ComboBoxItem Content="Rainbow1" Tag="Rainbow"/>
                                 </ComboBox>
                             </StackPanel>
                             

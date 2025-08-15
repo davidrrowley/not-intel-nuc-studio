@@ -178,7 +178,8 @@
                                      OnContent="ON" 
                                      OffContent="OFF"
                                      IsOn="False"
-                                     Foreground="#FF8A9BA8"/>
+                                     Foreground="#FF8A9BA8"
+                                     Toggled="OnEffectsToggled"/>
                     </Grid>
                 </StackPanel>
             </Border>
