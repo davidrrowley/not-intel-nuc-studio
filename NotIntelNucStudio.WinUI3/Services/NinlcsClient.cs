@@ -261,6 +261,24 @@ public class DisconnectCommand : LedCommand
     public override string CommandType => "Disconnect";
 }
 
+/// <summary>Get CPU temperature from Intel NUC sensors</summary>
+public class GetTemperatureCommand : LedCommand
+{
+    public override string CommandType => "GetTemperature";
+}
+
+/// <summary>Get fan speeds from Intel NUC sensors</summary>
+public class GetFanSpeedsCommand : LedCommand
+{
+    public override string CommandType => "GetFanSpeeds";
+}
+
+/// <summary>Get thermal and fan data from Intel NUC sensors</summary>
+public class GetThermalDataCommand : LedCommand
+{
+    public override string CommandType => "GetThermalData";
+}
+
 /// <summary>
 /// Standard response for all LED commands
 /// </summary>

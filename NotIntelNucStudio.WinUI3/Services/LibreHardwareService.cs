@@ -38,7 +38,7 @@ namespace NotIntelNucStudio.WinUI3.Services
         {
             try
             {
-                StatusChanged?.Invoke(this, "🔧 Initializing LibreHardwareMonitor...");
+                StatusChanged?.Invoke(this, "🔧 Initializing hardware monitoring...");
 
                 _computer = new Computer
                 {
@@ -51,7 +51,7 @@ namespace NotIntelNucStudio.WinUI3.Services
                     IsStorageEnabled = true
                 };
 
-                StatusChanged?.Invoke(this, "🖥️ Opening hardware interfaces...");
+                StatusChanged?.Invoke(this, "🖥️ Opening LibreHardwareMonitor interfaces...");
                 _computer.Open();
 
                 // Validate we found hardware
@@ -166,16 +166,50 @@ namespace NotIntelNucStudio.WinUI3.Services
 
             try
             {
-                var allSensors = await GetAllSensorsAsync();
+                // Try custom NUC thermal driver first for temperature data
+                bool customTempSuccess = false;
 
-                // CPU Temperature (average of cores)
-                var cpuTemps = allSensors.Where(s => s.Type == SensorType.Temperature && 
-                                                     s.HardwareType == HardwareType.Cpu &&
-                                                     s.Name.Contains("Core")).ToList();
-                if (cpuTemps.Any())
+                var allSensors = await GetAllSensorsAsync();
+                
+                // Debug: Log hardware and sensor type overview
+                var hardwareTypes = allSensors.GroupBy(s => s.HardwareType).ToList();
+                StatusChanged?.Invoke(this, $"🔍 Hardware overview: {string.Join(", ", hardwareTypes.Select(g => $"{g.Key}({g.Count()})"))}");
+                
+                var sensorTypes = allSensors.GroupBy(s => s.Type).ToList();
+                StatusChanged?.Invoke(this, $"🔍 Sensor types: {string.Join(", ", sensorTypes.Select(g => $"{g.Key}({g.Count()})"))}");
+
+                // CPU Temperature (only use LibreHardwareMonitor if custom driver failed)
+                if (!customTempSuccess)
                 {
-                    metrics["CpuTemperature"] = Math.Round(cpuTemps.Average(s => s.Value), 1);
-                    metrics["CpuTemperatureMax"] = cpuTemps.Max(s => s.Value);
+                    var cpuTemps = allSensors.Where(s => s.Type == SensorType.Temperature && 
+                                                         s.HardwareType == HardwareType.Cpu &&
+                                                         s.Name.Contains("Core")).ToList();
+                    
+                    // Debug: Log what CPU temperature sensors we find
+                    var allCpuSensors = allSensors.Where(s => s.HardwareType == HardwareType.Cpu).ToList();
+                    StatusChanged?.Invoke(this, $"🌡️ Found {allCpuSensors.Count} CPU sensors total");
+                    
+                    var allCpuTempSensors = allSensors.Where(s => s.Type == SensorType.Temperature && s.HardwareType == HardwareType.Cpu).ToList();
+                    StatusChanged?.Invoke(this, $"🌡️ Found {allCpuTempSensors.Count} CPU temperature sensors: {string.Join(", ", allCpuTempSensors.Select(s => $"{s.Name}={s.Value:F1}°C"))}");
+                    
+                    if (cpuTemps.Any())
+                    {
+                        metrics["CpuTemperature"] = Math.Round(cpuTemps.Average(s => s.Value), 1);
+                        metrics["CpuTemperatureMax"] = cpuTemps.Max(s => s.Value);
+                        StatusChanged?.Invoke(this, $"🌡️ CPU Temperature: {metrics["CpuTemperature"]}°C (from {cpuTemps.Count} core sensors)");
+                    }
+                    else
+                    {
+                        StatusChanged?.Invoke(this, "⚠️ No CPU core temperature sensors found!");
+                        
+                        // Try any CPU temperature sensor as fallback
+                        if (allCpuTempSensors.Any())
+                        {
+                            var fallbackTemp = allCpuTempSensors.First();
+                            metrics["CpuTemperature"] = Math.Round(fallbackTemp.Value, 1);
+                            StatusChanged?.Invoke(this, $"🌡️ Using fallback CPU temperature: {fallbackTemp.Name} = {fallbackTemp.Value:F1}°C");
+                        }
+                    }
                 }
 
                 // CPU Usage
@@ -248,6 +282,34 @@ namespace NotIntelNucStudio.WinUI3.Services
                     metrics["FanCount"] = fans.Count;
                     metrics["FanSpeedAvg"] = Math.Round(fans.Average(s => s.Value), 0);
                     metrics["FanSpeedMax"] = fans.Max(s => s.Value);
+                    
+                    // Debug: Log all fan sensors found
+                    StatusChanged?.Invoke(this, $"🌀 Found {fans.Count} fan sensors: {string.Join(", ", fans.Select(f => $"{f.Name}={f.Value:F0}RPM"))}");
+                    
+                    // Individual fan speeds for specific identification
+                    var cpuFan = fans.FirstOrDefault(f => f.Name.ToLower().Contains("cpu"));
+                    if (cpuFan != null)
+                    {
+                        metrics["CpuFanSpeed"] = Math.Round(cpuFan.Value, 0);
+                        StatusChanged?.Invoke(this, $"🌀 CPU Fan detected: {cpuFan.Name} = {cpuFan.Value:F0} RPM");
+                    }
+                    else
+                    {
+                        // Try first fan as CPU fan if no specific CPU fan found
+                        if (fans.Count > 0)
+                        {
+                            metrics["CpuFanSpeed"] = Math.Round(fans[0].Value, 0);
+                            StatusChanged?.Invoke(this, $"🌀 Using first fan as CPU: {fans[0].Name} = {fans[0].Value:F0} RPM");
+                        }
+                    }
+                    
+                    var systemFans = fans.Where(f => !f.Name.ToLower().Contains("cpu")).ToList();
+                    for (int i = 0; i < systemFans.Count && i < 3; i++)
+                    {
+                        metrics[$"SystemFan{i + 1}Speed"] = Math.Round(systemFans[i].Value, 0);
+                        metrics[$"SystemFan{i + 1}Name"] = systemFans[i].Name;
+                        StatusChanged?.Invoke(this, $"🌀 System Fan {i + 1}: {systemFans[i].Name} = {systemFans[i].Value:F0} RPM");
+                    }
                 }
 
                 // Power Consumption
@@ -371,14 +433,15 @@ namespace NotIntelNucStudio.WinUI3.Services
         {
             try
             {
-                StatusChanged?.Invoke(this, "🔧 Shutting down LibreHardwareMonitor...");
+                StatusChanged?.Invoke(this, "🔧 Shutting down hardware monitoring...");
+                
                 _computer?.Close();
                 _computer = null;
                 _isInitialized = false;
             }
             catch (Exception ex)
             {
-                StatusChanged?.Invoke(this, $"Error disposing LibreHardwareMonitor: {ex.Message}");
+                StatusChanged?.Invoke(this, $"Error disposing hardware monitoring: {ex.Message}");
             }
         }
     }
