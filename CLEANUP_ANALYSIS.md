@@ -144,13 +144,86 @@ not_intel_nuc_studio/
 ✅ KEEP: LedsPage.xaml(.cs) (working UI)
 ```
 
-## 🎯 NEXT STEPS
+## 🔍 PHASE 2: INVESTIGATION RESULTS
 
-1. **Immediate**: Delete empty duplicate and confirmed dead code
-2. **Investigate**: Check dependencies on Core/Service projects  
-3. **Evaluate**: Determine value of testing/utility projects
-4. **Reorganize**: Simplify solution structure
-5. **Document**: Update README with final architecture
+### ✅ **ARCHITECTURE ANALYSIS COMPLETE**
+
+#### **Current Dependency Chain:**
+```
+WORKING APP: NucLedController.WinUI3
+└── ✅ SELF-CONTAINED (no external project dependencies)
+    └── Uses: NinlcsClient.cs + LedServiceManager.cs (internal Services)
+
+LEGACY COM APPROACH: 
+├── NucLedController.Core (COM port + System.IO.Ports)
+├── NucLedController.Console (references Core)
+├── NucLedController.Service (references Core)
+└── Testing Projects:
+    ├── NucLedController.CommandExplorer (references Core)
+    ├── NucLedController.PatternTest (references Core)  
+    └── NucLedController.ServiceTest (references DELETED Client!)
+```
+
+#### **KEY FINDINGS:**
+
+1. **✅ WinUI3 is COMPLETELY INDEPENDENT**
+   - No project references to Core, Service, or any other project
+   - Uses only internal `NinlcsClient.cs` + `LedServiceManager.cs`
+   - Connects directly to external NINLCS service via named pipes
+
+2. **🏗️ Core/Service/Console = LEGACY COM PORT ARCHITECTURE**
+   - `NucLedController.Core`: Direct COM port control (SerialPort, mutex, etc.)
+   - `NucLedController.Service`: Named pipes service wrapping Core
+   - `NucLedController.Console`: CLI tool using Core directly
+   - **All use System.IO.Ports for direct hardware access**
+
+3. **🧪 Testing Projects = DEVELOPMENT/DEBUGGING TOOLS**
+   - `CommandExplorer`: Serial command investigation tool
+   - `PatternTest`: COM port pattern testing
+   - `ServiceTest`: **BROKEN** (references deleted Client project)
+
+4. **🔌 TWO COMPLETELY DIFFERENT APPROACHES:**
+   - **LEGACY**: COM port → Core → Service → Client
+   - **CURRENT**: WinUI3 → NINLCS external service (working!)
+
+### 📊 **PHASE 2 CLEANUP CATEGORIES**
+
+#### 🗑️ **IMMEDIATE DELETIONS (Broken/Obsolete)**
+```
+❌ DELETE: NucLedController.ServiceTest (references deleted Client)
+❌ DELETE: Testing projects (CommandExplorer, PatternTest) - dev tools only
+```
+
+#### ❓ **DECISION NEEDED: Core Architecture**
+```
+🤔 LEGACY COM ARCHITECTURE - Do we need it?
+   ├── NucLedController.Core (COM port implementation)
+   ├── NucLedController.Service (named pipes wrapper)  
+   └── NucLedController.Console (CLI tool)
+
+QUESTION: Are these still valuable as:
+- Alternative LED control method (if NINLCS service fails)?
+- Development/debugging tools?
+- Backup implementation?
+
+OR can we delete since WinUI3 works perfectly with NINLCS?
+```
+
+### 🎯 **RECOMMENDED APPROACH**
+
+**Option A: Clean Slate (Recommended)**
+- Delete ALL legacy projects (Core, Service, Console, Testing)
+- Keep only working WinUI3 + NINLCS integration
+- Simplest, cleanest architecture
+
+**Option B: Keep Minimal Legacy**
+- Keep Core + Console for emergency/debugging
+- Delete Service (duplicates NINLCS functionality)
+- Delete all testing projects
+
+**Option C: Keep All Legacy**
+- Keep Core, Service, Console as alternative approach
+- Delete only broken testing projects
 
 ## 💡 BENEFITS OF CLEANUP
 

@@ -4,13 +4,7 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NucLedController", "NucLedController", "{BF83A140-5CEE-D830-E6FF-2B2517A1D878}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.Console", "NucLedController\NucLedController.Console\NucLedController.Console.csproj", "{83A8B1E2-1D55-9776-44FF-45782C43ACFC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.Core", "NucLedController\NucLedController.Core\NucLedController.Core.csproj", "{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.WinUI3", "NucLedController\NucLedController.WinUI3\NucLedController.WinUI3.csproj", "{C7B2E8F1-3456-7890-ABCD-EF1234567890}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.Service", "NucLedController\NucLedController.Service\NucLedController.Service.csproj", "{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,31 +12,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{83A8B1E2-1D55-9776-44FF-45782C43ACFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83A8B1E2-1D55-9776-44FF-45782C43ACFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83A8B1E2-1D55-9776-44FF-45782C43ACFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83A8B1E2-1D55-9776-44FF-45782C43ACFC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C7B2E8F1-3456-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C7B2E8F1-3456-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7B2E8F1-3456-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7B2E8F1-3456-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{83A8B1E2-1D55-9776-44FF-45782C43ACFC} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
-		{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
 		{C7B2E8F1-3456-7890-ABCD-EF1234567890} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
-		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {19D61D30-F17B-48B9-AEA5-B62B22438A49}
