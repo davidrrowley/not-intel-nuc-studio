@@ -1,0 +1,335 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Management;
+using LibreHardwareMonitor.Hardware;
+
+namespace NotIntelNucStudio.WinUI3.Services
+{
+    /// <summary>
+    /// Self-contained hardware monitoring using LibreHardwareMonitor
+    /// This is open source and doesn't require external applications
+    /// </summary>
+    public class LibreHardwareService : IDisposable
+    {
+        private Computer? _computer;
+        private bool _isInitialized = false;
+
+        public event EventHandler<string>? StatusChanged;
+
+        public class HardwareSensor
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Identifier { get; set; } = string.Empty;
+            public float Value { get; set; }
+            public string Unit { get; set; } = string.Empty;
+            public SensorType Type { get; set; }
+            public float Min { get; set; }
+            public float Max { get; set; }
+            public string HardwareName { get; set; } = string.Empty;
+            public HardwareType HardwareType { get; set; }
+        }
+
+        /// <summary>
+        /// Initialize LibreHardwareMonitor
+        /// </summary>
+        public async Task<bool> InitializeAsync()
+        {
+            try
+            {
+                StatusChanged?.Invoke(this, "🔧 Initializing LibreHardwareMonitor...");
+
+                _computer = new Computer
+                {
+                    IsCpuEnabled = true,
+                    IsGpuEnabled = true,
+                    IsMemoryEnabled = true,
+                    IsMotherboardEnabled = true,
+                    IsControllerEnabled = true,
+                    IsNetworkEnabled = true,
+                    IsStorageEnabled = true
+                };
+
+                StatusChanged?.Invoke(this, "🖥️ Opening hardware interfaces...");
+                _computer.Open();
+
+                // Validate we found hardware
+                var hardwareCount = _computer.Hardware.Count;
+                StatusChanged?.Invoke(this, $"🔍 Found {hardwareCount} hardware components");
+
+                if (hardwareCount == 0)
+                {
+                    StatusChanged?.Invoke(this, "⚠️ No hardware detected by LibreHardwareMonitor");
+                    return false;
+                }
+
+                // Log detected hardware
+                foreach (IHardware hardware in _computer.Hardware)
+                {
+                    StatusChanged?.Invoke(this, $"📋 {hardware.HardwareType}: {hardware.Name}");
+                    
+                    // Update hardware to get sensor data
+                    hardware.Update();
+                    
+                    // Count sensors for this hardware
+                    var sensorCount = hardware.Sensors.Count();
+                    StatusChanged?.Invoke(this, $"   📊 {sensorCount} sensors available");
+                }
+
+                _isInitialized = true;
+                StatusChanged?.Invoke(this, "✅ LibreHardwareMonitor initialized successfully");
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke(this, $"❌ Error initializing LibreHardwareMonitor: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get all current sensor readings
+        /// </summary>
+        public async Task<List<HardwareSensor>> GetAllSensorsAsync()
+        {
+            var sensors = new List<HardwareSensor>();
+
+            if (!_isInitialized || _computer == null)
+            {
+                StatusChanged?.Invoke(this, "⚠️ LibreHardwareMonitor not initialized");
+                return sensors;
+            }
+
+            try
+            {
+                foreach (IHardware hardware in _computer.Hardware)
+                {
+                    // Update hardware to get latest sensor readings
+                    hardware.Update();
+
+                    foreach (ISensor sensor in hardware.Sensors)
+                    {
+                        if (sensor.Value.HasValue)
+                        {
+                            sensors.Add(new HardwareSensor
+                            {
+                                Name = sensor.Name,
+                                Identifier = sensor.Identifier.ToString(),
+                                Value = sensor.Value.Value,
+                                Unit = GetSensorUnit(sensor.SensorType),
+                                Type = sensor.SensorType,
+                                Min = sensor.Min ?? 0,
+                                Max = sensor.Max ?? 0,
+                                HardwareName = hardware.Name,
+                                HardwareType = hardware.HardwareType
+                            });
+                        }
+                    }
+                }
+
+                StatusChanged?.Invoke(this, $"📊 Retrieved {sensors.Count} sensor readings");
+                return sensors;
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke(this, $"❌ Error reading sensors: {ex.Message}");
+                return sensors;
+            }
+        }
+
+        /// <summary>
+        /// Get sensors by type (Temperature, Fan, Voltage, etc.)
+        /// </summary>
+        public async Task<List<HardwareSensor>> GetSensorsByTypeAsync(SensorType sensorType)
+        {
+            var allSensors = await GetAllSensorsAsync();
+            return allSensors.Where(s => s.Type == sensorType).ToList();
+        }
+
+        /// <summary>
+        /// Get sensors by hardware type (CPU, GPU, Motherboard, etc.)
+        /// </summary>
+        public async Task<List<HardwareSensor>> GetSensorsByHardwareAsync(HardwareType hardwareType)
+        {
+            var allSensors = await GetAllSensorsAsync();
+            return allSensors.Where(s => s.HardwareType == hardwareType).ToList();
+        }
+
+        /// <summary>
+        /// Get critical system metrics for dashboard
+        /// </summary>
+        public async Task<Dictionary<string, object>> GetSystemMetricsAsync()
+        {
+            var metrics = new Dictionary<string, object>();
+
+            try
+            {
+                var allSensors = await GetAllSensorsAsync();
+
+                // CPU Temperature (average of cores)
+                var cpuTemps = allSensors.Where(s => s.Type == SensorType.Temperature && 
+                                                     s.HardwareType == HardwareType.Cpu &&
+                                                     s.Name.Contains("Core")).ToList();
+                if (cpuTemps.Any())
+                {
+                    metrics["CpuTemperature"] = Math.Round(cpuTemps.Average(s => s.Value), 1);
+                    metrics["CpuTemperatureMax"] = cpuTemps.Max(s => s.Value);
+                }
+
+                // CPU Usage
+                var cpuUsage = allSensors.FirstOrDefault(s => s.Type == SensorType.Load && 
+                                                             s.HardwareType == HardwareType.Cpu &&
+                                                             s.Name.Contains("Total"));
+                if (cpuUsage != null)
+                {
+                    metrics["CpuUsage"] = Math.Round(cpuUsage.Value, 1);
+                }
+
+                // CPU Clock Speed
+                var cpuClock = allSensors.FirstOrDefault(s => s.Type == SensorType.Clock && 
+                                                             s.HardwareType == HardwareType.Cpu);
+                if (cpuClock != null)
+                {
+                    metrics["CpuClock"] = Math.Round(cpuClock.Value, 0);
+                }
+
+                // Memory Usage
+                var memUsage = allSensors.FirstOrDefault(s => s.Type == SensorType.Load && 
+                                                             s.HardwareType == HardwareType.Memory);
+                if (memUsage != null)
+                {
+                    metrics["MemoryUsage"] = Math.Round(memUsage.Value, 1);
+                }
+
+                // Fan Speeds
+                var fans = allSensors.Where(s => s.Type == SensorType.Fan).ToList();
+                if (fans.Any())
+                {
+                    metrics["FanCount"] = fans.Count;
+                    metrics["FanSpeedAvg"] = Math.Round(fans.Average(s => s.Value), 0);
+                    metrics["FanSpeedMax"] = fans.Max(s => s.Value);
+                }
+
+                // Power Consumption
+                var power = allSensors.FirstOrDefault(s => s.Type == SensorType.Power && 
+                                                          s.HardwareType == HardwareType.Cpu);
+                if (power != null)
+                {
+                    metrics["PowerConsumption"] = Math.Round(power.Value, 1);
+                }
+
+                StatusChanged?.Invoke(this, $"📊 System metrics: CPU {metrics.GetValueOrDefault("CpuTemperature", "N/A")}°C, Usage {metrics.GetValueOrDefault("CpuUsage", "N/A")}%");
+
+                return metrics;
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke(this, $"❌ Error getting system metrics: {ex.Message}");
+                return metrics;
+            }
+        }
+
+        /// <summary>
+        /// Get sensor unit string based on sensor type
+        /// </summary>
+        private static string GetSensorUnit(SensorType sensorType)
+        {
+            return sensorType switch
+            {
+                SensorType.Temperature => "°C",
+                SensorType.Fan => "RPM",
+                SensorType.Voltage => "V",
+                SensorType.Clock => "MHz",
+                SensorType.Load => "%",
+                SensorType.Power => "W",
+                SensorType.Data => "GB",
+                SensorType.SmallData => "MB",
+                SensorType.Flow => "L/h",
+                SensorType.Control => "%",
+                SensorType.Level => "%",
+                SensorType.Factor => "x",
+                SensorType.Frequency => "Hz",
+                SensorType.Throughput => "B/s",
+                _ => ""
+            };
+        }
+
+        /// <summary>
+        /// Get system information from WMI and hardware sensors
+        /// </summary>
+        public async Task<Dictionary<string, string>> GetSystemInfoAsync()
+        {
+            var systemInfo = new Dictionary<string, string>();
+
+            try
+            {
+                // Get system information from WMI
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_ComputerSystem"))
+                {
+                    foreach (var obj in searcher.Get())
+                    {
+                        systemInfo["SystemModel"] = obj["Model"]?.ToString() ?? "Unknown";
+                        systemInfo["SystemManufacturer"] = obj["Manufacturer"]?.ToString() ?? "Unknown";
+                        break;
+                    }
+                }
+
+                // Get BIOS information
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_BIOS"))
+                {
+                    foreach (var obj in searcher.Get())
+                    {
+                        systemInfo["BiosVersion"] = obj["SMBIOSBIOSVersion"]?.ToString() ?? "Unknown";
+                        break;
+                    }
+                }
+
+                // Get CPU information
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_Processor"))
+                {
+                    foreach (var obj in searcher.Get())
+                    {
+                        systemInfo["CpuName"] = obj["Name"]?.ToString()?.Trim() ?? "Unknown";
+                        break;
+                    }
+                }
+
+                // Get motherboard information
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard"))
+                {
+                    foreach (var obj in searcher.Get())
+                    {
+                        systemInfo["BaseBoardVersion"] = obj["Version"]?.ToString() ?? "Unknown";
+                        systemInfo["BaseBoardProduct"] = obj["Product"]?.ToString() ?? "Unknown";
+                        break;
+                    }
+                }
+
+                StatusChanged?.Invoke(this, "📋 System information retrieved successfully");
+                return systemInfo;
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke(this, $"❌ Error getting system info: {ex.Message}");
+                return systemInfo;
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                StatusChanged?.Invoke(this, "🔧 Shutting down LibreHardwareMonitor...");
+                _computer?.Close();
+                _computer = null;
+                _isInitialized = false;
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke(this, $"Error disposing LibreHardwareMonitor: {ex.Message}");
+            }
+        }
+    }
+}

@@ -2,9 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NucLedController", "NucLedController", "{BF83A140-5CEE-D830-E6FF-2B2517A1D878}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.WinUI3", "NucLedController\NucLedController.WinUI3\NucLedController.WinUI3.csproj", "{C7B2E8F1-3456-7890-ABCD-EF1234567890}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotIntelNucStudio.WinUI3", "NotIntelNucStudio.WinUI3\NotIntelNucStudio.WinUI3.csproj", "{C7B2E8F1-3456-7890-ABCD-EF1234567890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,7 +19,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C7B2E8F1-3456-7890-ABCD-EF1234567890} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {19D61D30-F17B-48B9-AEA5-B62B22438A49}

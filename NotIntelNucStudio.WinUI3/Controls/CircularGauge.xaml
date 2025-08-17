@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="NotIntelNucStudio.WinUI3.Controls.CircularGauge"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:NotIntelNucStudio.WinUI3.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <!-- Canvas for drawing circles -->
+        <Canvas x:Name="MainCanvas">
+            <!-- Background Circle -->
+            <Ellipse x:Name="BackgroundCircle"
+                    Stroke="#FF374151"
+                    StrokeThickness="4"
+                    Fill="Transparent"/>
+            
+            <!-- Progress Arc -->
+            <Path x:Name="ProgressArc"
+                  Stroke="#FF0EA5E9"
+                  StrokeThickness="4"
+                  Fill="Transparent"
+                  StrokeStartLineCap="Round"
+                  StrokeEndLineCap="Round"/>
+        </Canvas>
+        
+        <!-- Center Content -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock x:Name="ValueText"
+                      Text="0%"
+                      FontSize="14"
+                      FontWeight="SemiBold"
+                      Foreground="White"
+                      HorizontalAlignment="Center"/>
+            <TextBlock x:Name="UnitText"
+                      Text=""
+                      FontSize="9"
+                      Foreground="#FF9CA3AF"
+                      HorizontalAlignment="Center"
+                      Margin="0,1,0,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

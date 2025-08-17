@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Class="IntelNucStudio.Views.SystemMonitorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:IntelNucStudio"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    
+    <Grid Background="#FF1E1E1E">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#FF2D2D30" Padding="20,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="←" 
+                       Background="Transparent" 
+                       Foreground="#FF0078D4" 
+                       BorderBrush="Transparent"
+                       FontSize="18"
+                       Padding="8,4"
+                       Click="BackButton_Click"/>
+                <TextBlock Text="Home" 
+                          Foreground="#FF0078D4" 
+                          VerticalAlignment="Center" 
+                          Margin="8,0"/>
+                <TextBlock Text=" > " 
+                          Foreground="#FFCCCCCC" 
+                          VerticalAlignment="Center"/>
+                <TextBlock Text="System Monitor" 
+                          Foreground="White" 
+                          VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" Padding="40">
+            <StackPanel Spacing="30">
+                
+                <!-- System Monitor Header -->
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <FontIcon Glyph="&#xE7F8;" FontSize="32" Foreground="#FFE3B505"/>
+                    <TextBlock Text="System Monitor" 
+                              FontSize="28" 
+                              FontWeight="SemiBold" 
+                              Foreground="White" 
+                              VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <!-- Performance Cards Grid -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnSpacing>20</Grid.ColumnSpacing>
+                    <Grid.RowSpacing>20</Grid.RowSpacing>
+                    
+                    <!-- Processor Card -->
+                    <Border Grid.Row="0" Grid.Column="0" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Processor" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- CPU Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FFE3B505" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="1.06,5.12"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="CpuUsageText"
+                                              Text="17%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="CpuTempText"
+                                              Text="75°C" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- CPU Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Name: 11th Gen Intel(R) Core(TM) i9-11900KB @ 3.30GHz" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC" 
+                                          TextWrapping="Wrap"/>
+                                <TextBlock Text="Current Clock Speed: 4503.27 MHz" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"
+                                          x:Name="CpuClockText"/>
+                                <TextBlock Text="Max Clock Speed: 4803.49 MHz" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- iGPU Card -->
+                    <Border Grid.Row="0" Grid.Column="1" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="iGPU" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- iGPU Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FF32CD32" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="1.63,4.55"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="GpuUsageText"
+                                              Text="26%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="GpuTempText"
+                                              Text="67°C" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- iGPU Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Name: Intel(R) UHD Graphics" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- dGPU Card -->
+                    <Border Grid.Row="0" Grid.Column="2" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="dGPU" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- dGPU Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FFFF6B35" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="1.63,4.55"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="dGpuUsageText"
+                                              Text="26%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="dGpuTempText"
+                                              Text="59°C" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- dGPU Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Name: NVIDIA GeForce RTX 3060" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Core Clock Speed: 2055 MHz" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Memory Clock Speed: 7501 MHz" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Memory: 12 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Memory Card -->
+                    <Border Grid.Row="1" Grid.Column="0" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Memory" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- Memory Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FF0078D4" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="2.26,3.92"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="MemoryUsageText"
+                                              Text="36%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- Memory Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="MemoryAvailableText"
+                                          Text="Available Memory: 40.81 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock x:Name="MemoryTotalText"
+                                          Text="Total Memory: 63.51 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Storage C: Card -->
+                    <Border Grid.Row="1" Grid.Column="1" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Storage" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- Storage Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FFE3B505" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="5.71,0.47"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock x:Name="StorageUsageText"
+                                              Text="91%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- Storage Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="StorageNameText"
+                                          Text="Name: C:" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock x:Name="StorageFreeText"
+                                          Text="Free Space: 42.48 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock x:Name="StorageTotalText"
+                                          Text="Total Size: 464.95 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock x:Name="StorageTypeText"
+                                          Text="Interface Type: SSD-NVMe" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Storage D: Card -->
+                    <Border Grid.Row="1" Grid.Column="2" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Storage" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- Storage Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FFE3B505" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="5.02,1.16"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="80%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- Storage Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Name: D: New Volume" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Free Space: 93.52 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Total Size: 465.76 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Interface Type: SSD-NVMe" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Storage E: Card -->
+                    <Border Grid.Row="2" Grid.Column="0" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20"
+                           MinHeight="200">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="SSD2SystemDataType" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <!-- Storage Gauge -->
+                            <Grid HorizontalAlignment="Center">
+                                <Ellipse Stroke="#FF404040" StrokeThickness="8" Width="100" Height="100"/>
+                                <Ellipse Stroke="#FFE3B505" 
+                                        StrokeThickness="8" 
+                                        Width="100" 
+                                        Height="100"
+                                        StrokeDashArray="0.94,5.24"
+                                        StrokeDashOffset="1.57"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="15%" 
+                                              FontSize="20" 
+                                              FontWeight="Bold" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- Storage Details -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Name: E: Data_2" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Free Space: 393.72 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Total Size: 464.81 GB" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                                <TextBlock Text="Interface Type: SSD-NVMe" 
+                                          FontSize="10" 
+                                          Foreground="#FFCCCCCC"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                
+                <!-- System Information and Fan Status -->
+                <Grid Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.ColumnSpacing>40</Grid.ColumnSpacing>
+                    
+                    <!-- System Information Card -->
+                    <Border Grid.Column="0" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="System Information" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.ColumnSpacing>20</Grid.ColumnSpacing>
+                                
+                                <!-- Left Column -->
+                                <StackPanel Grid.Column="0" Spacing="8">
+                                    <TextBlock x:Name="SystemModelText"
+                                              Text="System Model: NUC11BTMi9" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                    <TextBlock x:Name="BiosVersionText"
+                                              Text="BIOS Version: DBTGL579.0073.2024.1111.1926" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                    <TextBlock x:Name="EmbeddedControllerText"
+                                              Text="Embedded Controller Version: 3.5" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                    <TextBlock x:Name="BaseBoardVersionText"
+                                              Text="BaseBoard Version: M17026-403" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                </StackPanel>
+                                
+                                <!-- Right Column -->
+                                <StackPanel Grid.Column="1" Spacing="8">
+                                    <TextBlock x:Name="SystemManufacturerText"
+                                              Text="System Manufacturer: Intel(R) Client Systems" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                    <TextBlock x:Name="SystemSkuText"
+                                              Text="System SKU: RNUC11BTMi90000" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                    <TextBlock x:Name="SystemVersionText"
+                                              Text="System Version: M26263-403" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                    <TextBlock x:Name="MotherboardTempText"
+                                              Text="Motherboard Temp: 35°C" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Fan Status Card -->
+                    <Border Grid.Column="1" 
+                           Background="#FF2D2D30" 
+                           CornerRadius="8" 
+                           Padding="20">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Fan Status" 
+                                      FontSize="18" 
+                                      FontWeight="SemiBold" 
+                                      Foreground="White"/>
+                            
+                            <StackPanel Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE7F4;" FontSize="16" Foreground="#FF0078D4"/>
+                                    <TextBlock x:Name="CpuFanRpmText"
+                                              Text="CPU Fan: 1997 RPM" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE7F4;" FontSize="16" Foreground="#FF0078D4"/>
+                                    <TextBlock x:Name="SystemFan1RpmText"
+                                              Text="System Fan 1: 904 RPM" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE7F4;" FontSize="16" Foreground="#FF0078D4"/>
+                                    <TextBlock x:Name="SystemFan2RpmText"
+                                              Text="System Fan 2: 953 RPM" 
+                                              FontSize="12" 
+                                              Foreground="#FFCCCCCC"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
