@@ -187,6 +187,22 @@ namespace NotIntelNucStudio.WinUI3.Services
                     metrics["CpuUsage"] = Math.Round(cpuUsage.Value, 1);
                 }
 
+                // GPU Usage
+                var gpuUsage = allSensors.FirstOrDefault(s => s.Type == SensorType.Load && 
+                                                             s.HardwareType == HardwareType.GpuNvidia);
+                if (gpuUsage != null)
+                {
+                    metrics["GpuUsage"] = Math.Round(gpuUsage.Value, 1);
+                }
+
+                // GPU Temperature
+                var gpuTemp = allSensors.FirstOrDefault(s => s.Type == SensorType.Temperature && 
+                                                            s.HardwareType == HardwareType.GpuNvidia);
+                if (gpuTemp != null)
+                {
+                    metrics["GpuTemperature"] = Math.Round(gpuTemp.Value, 1);
+                }
+
                 // CPU Clock Speed
                 var cpuClock = allSensors.FirstOrDefault(s => s.Type == SensorType.Clock && 
                                                              s.HardwareType == HardwareType.Cpu);
@@ -201,6 +217,28 @@ namespace NotIntelNucStudio.WinUI3.Services
                 if (memUsage != null)
                 {
                     metrics["MemoryUsage"] = Math.Round(memUsage.Value, 1);
+                }
+
+                // System/Motherboard Temperature
+                var systemTemp = allSensors.FirstOrDefault(s => s.Type == SensorType.Temperature && 
+                                                               s.HardwareType == HardwareType.Motherboard);
+                if (systemTemp != null)
+                {
+                    metrics["SystemTemperature"] = Math.Round(systemTemp.Value, 1);
+                }
+
+                // Overall System Health (average of CPU, GPU, Memory usage)
+                var systemHealthComponents = new List<double>();
+                if (metrics.ContainsKey("CpuUsage"))
+                    systemHealthComponents.Add(Convert.ToDouble(metrics["CpuUsage"]));
+                if (metrics.ContainsKey("GpuUsage"))
+                    systemHealthComponents.Add(Convert.ToDouble(metrics["GpuUsage"]));
+                if (metrics.ContainsKey("MemoryUsage"))
+                    systemHealthComponents.Add(Convert.ToDouble(metrics["MemoryUsage"]));
+                
+                if (systemHealthComponents.Any())
+                {
+                    metrics["SystemHealth"] = Math.Round(systemHealthComponents.Average(), 1);
                 }
 
                 // Fan Speeds
@@ -276,12 +314,24 @@ namespace NotIntelNucStudio.WinUI3.Services
                     }
                 }
 
+                // Get system product information
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_ComputerSystemProduct"))
+                {
+                    foreach (var obj in searcher.Get())
+                    {
+                        systemInfo["SystemSku"] = obj["IdentifyingNumber"]?.ToString() ?? "Unknown";
+                        systemInfo["SystemVersion"] = obj["Version"]?.ToString() ?? "Unknown";
+                        break;
+                    }
+                }
+
                 // Get BIOS information
                 using (var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_BIOS"))
                 {
                     foreach (var obj in searcher.Get())
                     {
                         systemInfo["BiosVersion"] = obj["SMBIOSBIOSVersion"]?.ToString() ?? "Unknown";
+                        systemInfo["EmbeddedController"] = obj["EmbeddedControllerMajorVersion"]?.ToString() + "." + obj["EmbeddedControllerMinorVersion"]?.ToString() ?? "Unknown";
                         break;
                     }
                 }

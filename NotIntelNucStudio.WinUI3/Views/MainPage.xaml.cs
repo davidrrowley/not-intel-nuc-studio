@@ -14,6 +14,7 @@ using NotIntelNucStudio.WinUI3.Helpers;
 using System.Threading.Tasks;
 using NotIntelNucStudio.WinUI3.Services;
 using LibreHardwareMonitor.Hardware;
+using System.Management;
 
 #nullable enable
 
@@ -32,7 +33,6 @@ namespace NotIntelNucStudio.WinUI3.Views
         private bool _userToggling = false; // Prevent recursive toggle events
         private bool _commandInProgress = false; // Prevent concurrent commands
         private LibreHardwareService? _hardwareService; // Hardware monitoring service
-        private int _systemInfoUpdateCounter = 0; // Counter for periodic system info updates
 
         public MainPage()
         {
@@ -68,6 +68,9 @@ namespace NotIntelNucStudio.WinUI3.Views
             ConfigureResponsiveLayout();
             ConfigureResponsiveNucLayout();
             
+            // Load system info immediately (fast WMI-only operation)
+            _ = LoadSystemInfoImmediatelyAsync();
+            
             // Auto-connect to service and setup Effects toggle
             _ = InitializeServiceConnectionAsync();
             
@@ -98,12 +101,15 @@ namespace NotIntelNucStudio.WinUI3.Views
                             var hwInitResult = await tempHardwareService.InitializeAsync();
                             
                             // Update on UI thread
-                            DispatcherQueue.TryEnqueue(() =>
+                            DispatcherQueue.TryEnqueue(async () =>
                             {
                                 if (hwInitResult)
                                 {
                                     _hardwareService = tempHardwareService;
                                     WriteDebugToFile("✅ Hardware monitoring service initialized successfully (background)");
+                                    
+                                    // Update system information once (this data never changes during runtime)
+                                    await UpdateSystemInfoOnceAsync();
                                 }
                                 else
                                 {
@@ -532,12 +538,6 @@ namespace NotIntelNucStudio.WinUI3.Views
             // Use real hardware data if service is available, otherwise fall back to mock data
             if (_hardwareService != null)
             {
-                // Log first successful hardware data fetch
-                if (_systemInfoUpdateCounter == 0)
-                {
-                    WriteDebugToFile("🎯 Hardware monitoring service is now active - switching from mock to real data");
-                }
-                
                 try
                 {
                     // Get system metrics
@@ -548,6 +548,13 @@ namespace NotIntelNucStudio.WinUI3.Views
                     {
                         var cpuUsage = Convert.ToDouble(metrics["CpuUsage"]);
                         MainSystemCpuGauge.Value = Math.Max(0, Math.Min(100, cpuUsage));
+                        
+                        // Also update CPU temperature
+                        if (metrics.ContainsKey("CpuTemperature"))
+                        {
+                            var cpuTemp = Convert.ToDouble(metrics["CpuTemperature"]);
+                            MainSystemCpuGauge.Temperature = cpuTemp;
+                        }
                     }
 
                     // Update memory gauge with real data
@@ -555,6 +562,24 @@ namespace NotIntelNucStudio.WinUI3.Views
                     {
                         var memUsage = Convert.ToDouble(metrics["MemoryUsage"]);
                         MainSystemMemoryGauge.Value = Math.Max(0, Math.Min(100, memUsage));
+                    }
+
+                    // Update System Health gauge with overall system health and temperature
+                    if (MainSystemTempGauge != null)
+                    {
+                        // System Health (main value) - average of CPU, GPU, Memory usage
+                        if (metrics.ContainsKey("SystemHealth"))
+                        {
+                            var systemHealth = Convert.ToDouble(metrics["SystemHealth"]);
+                            MainSystemTempGauge.Value = Math.Max(0, Math.Min(100, systemHealth));
+                        }
+                        
+                        // System Temperature (small text below)
+                        if (metrics.ContainsKey("SystemTemperature"))
+                        {
+                            var systemTemp = Convert.ToDouble(metrics["SystemTemperature"]);
+                            MainSystemTempGauge.Temperature = systemTemp;
+                        }
                     }
 
                     // Get GPU data separately
@@ -571,16 +596,33 @@ namespace NotIntelNucStudio.WinUI3.Views
                     // Update GPU gauge with real data
                     if (MainSystemGpuGauge != null)
                     {
-                        var gpuLoad = gpuSensors.FirstOrDefault(s => s.Type == LibreHardwareMonitor.Hardware.SensorType.Load && 
-                                                                     s.Name.Contains("GPU Core"));
-                        if (gpuLoad != null)
+                        // Update GPU usage from metrics first (more reliable)
+                        if (metrics.ContainsKey("GpuUsage"))
                         {
-                            MainSystemGpuGauge.Value = Math.Max(0, Math.Min(100, gpuLoad.Value));
+                            var gpuUsage = Convert.ToDouble(metrics["GpuUsage"]);
+                            MainSystemGpuGauge.Value = Math.Max(0, Math.Min(100, gpuUsage));
                         }
                         else
                         {
-                            // Keep existing value if no GPU data available
-                            MainSystemGpuGauge.Value = Math.Max(0, Math.Min(60, MainSystemGpuGauge.Value + _random.Next(-3, 5)));
+                            // Fallback to sensor-based lookup
+                            var gpuLoad = gpuSensors.FirstOrDefault(s => s.Type == LibreHardwareMonitor.Hardware.SensorType.Load && 
+                                                                         s.Name.Contains("GPU Core"));
+                            if (gpuLoad != null)
+                            {
+                                MainSystemGpuGauge.Value = Math.Max(0, Math.Min(100, gpuLoad.Value));
+                            }
+                            else
+                            {
+                                // Keep existing value if no GPU data available
+                                MainSystemGpuGauge.Value = Math.Max(0, Math.Min(60, MainSystemGpuGauge.Value + _random.Next(-3, 5)));
+                            }
+                        }
+                        
+                        // Update GPU temperature
+                        if (metrics.ContainsKey("GpuTemperature"))
+                        {
+                            var gpuTemp = Convert.ToDouble(metrics["GpuTemperature"]);
+                            MainSystemGpuGauge.Temperature = gpuTemp;
                         }
                     }
 
@@ -600,14 +642,6 @@ namespace NotIntelNucStudio.WinUI3.Views
 
                     // Update fan speeds with real data
                     await UpdateFanSpeedsAsync();
-
-                    // Update system info on first run or every 60 seconds (20 cycles * 3 seconds)
-                    _systemInfoUpdateCounter++;
-                    if (_systemInfoUpdateCounter == 1 || _systemInfoUpdateCounter >= 20)
-                    {
-                        await UpdateSystemInfoAsync();
-                        _systemInfoUpdateCounter = 0;
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -806,47 +840,344 @@ namespace NotIntelNucStudio.WinUI3.Views
             }
         }
 
-        private async Task UpdateSystemInfoAsync()
+        private async Task UpdateSystemInfoOnceAsync()
         {
             if (_hardwareService == null) return;
 
             try
             {
+                WriteDebugToFile("📋 Loading system information (one-time)...");
                 var systemInfo = await _hardwareService.GetSystemInfoAsync();
 
-                DispatcherQueue.TryEnqueue(() =>
+                if (systemInfo.ContainsKey("SystemModel") && SystemModelText != null)
                 {
-                    if (systemInfo.ContainsKey("SystemModel") && SystemModelText != null)
-                    {
-                        SystemModelText.Text = $"System Model: {systemInfo["SystemModel"]}";
-                    }
+                    SystemModelText.Text = $"System Model: {systemInfo["SystemModel"]}";
+                }
 
-                    if (systemInfo.ContainsKey("SystemManufacturer") && SystemManufacturerText != null)
-                    {
-                        SystemManufacturerText.Text = $"System Manufacturer: {systemInfo["SystemManufacturer"]}";
-                    }
+                if (systemInfo.ContainsKey("SystemManufacturer") && SystemManufacturerText != null)
+                {
+                    SystemManufacturerText.Text = $"System Manufacturer: {systemInfo["SystemManufacturer"]}";
+                }
 
-                    if (systemInfo.ContainsKey("BiosVersion") && BiosVersionText != null)
-                    {
-                        BiosVersionText.Text = $"BIOS Version: {systemInfo["BiosVersion"]}";
-                    }
+                if (systemInfo.ContainsKey("BiosVersion") && BiosVersionText != null)
+                {
+                    BiosVersionText.Text = $"BIOS Version: {systemInfo["BiosVersion"]}";
+                }
 
-                    if (systemInfo.ContainsKey("CpuName") && CpuInfoText != null)
-                    {
-                        CpuInfoText.Text = $"CPU: {systemInfo["CpuName"]}";
-                    }
+                if (systemInfo.ContainsKey("SystemSku") && SystemSkuText != null)
+                {
+                    SystemSkuText.Text = $"System SKU: {systemInfo["SystemSku"]}";
+                }
 
-                    if (systemInfo.ContainsKey("BaseBoardVersion") && BaseBoardVersionText != null)
-                    {
-                        BaseBoardVersionText.Text = $"BaseBoard Version: {systemInfo["BaseBoardVersion"]}";
-                    }
-                });
+                if (systemInfo.ContainsKey("EmbeddedController") && EmbeddedControllerText != null)
+                {
+                    EmbeddedControllerText.Text = $"Embedded Controller Version: {systemInfo["EmbeddedController"]}";
+                }
 
-                WriteDebugToFile("📋 System information updated successfully");
+                if (systemInfo.ContainsKey("SystemVersion") && SystemVersionText != null)
+                {
+                    SystemVersionText.Text = $"System Version: {systemInfo["SystemVersion"]}";
+                }
+
+                if (systemInfo.ContainsKey("CpuName") && CpuInfoText != null)
+                {
+                    CpuInfoText.Text = $"CPU: {systemInfo["CpuName"]}";
+                }
+
+                if (systemInfo.ContainsKey("BaseBoardVersion") && BaseBoardVersionText != null)
+                {
+                    BaseBoardVersionText.Text = $"BaseBoard Version: {systemInfo["BaseBoardVersion"]}";
+                }
+
+                WriteDebugToFile("✅ System information loaded successfully (one-time)");
             }
             catch (Exception ex)
             {
-                WriteDebugToFile($"⚠️ Error updating system info: {ex.Message}");
+                WriteDebugToFile($"⚠️ Error loading system info: {ex.Message}");
+            }
+        }
+
+        private async Task LoadSystemInfoImmediatelyAsync()
+        {
+            try
+            {
+                WriteDebugToFile("⚡ Loading system information immediately (fast WMI query)...");
+                
+                // Run WMI queries in background thread, then update UI
+                await Task.Run(async () =>
+                {
+                    var systemInfo = new Dictionary<string, string>();
+                    
+                    try
+                    {
+                        // Run all WMI queries in parallel for faster execution
+                        var tasks = new List<Task>();
+                        
+                        // Win32_ComputerSystem query
+                        tasks.Add(Task.Run(() =>
+                        {
+                            try
+                            {
+                                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_ComputerSystem"))
+                                using (var collection = searcher.Get())
+                                {
+                                    foreach (ManagementObject mo in collection)
+                                    {
+                                        lock (systemInfo)
+                                        {
+                                            systemInfo["SystemModel"] = mo["Model"]?.ToString() ?? "Unknown";
+                                            systemInfo["SystemManufacturer"] = mo["Manufacturer"]?.ToString() ?? "Unknown";
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteDebugToFile($"⚠️ Error in Win32_ComputerSystem query: {ex.Message}");
+                            }
+                        }));
+
+                        // Win32_BIOS query
+                        tasks.Add(Task.Run(() =>
+                        {
+                            try
+                            {
+                                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_BIOS"))
+                                using (var collection = searcher.Get())
+                                {
+                                    foreach (ManagementObject mo in collection)
+                                    {
+                                        lock (systemInfo)
+                                        {
+                                            systemInfo["BiosVersion"] = mo["SMBIOSBIOSVersion"]?.ToString() ?? "Unknown";
+                                            systemInfo["SystemVersion"] = mo["Version"]?.ToString() ?? "Unknown";
+                                            systemInfo["EmbeddedController"] = mo["EmbeddedControllerMajorVersion"]?.ToString() + "." + mo["EmbeddedControllerMinorVersion"]?.ToString() ?? "Unknown";
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteDebugToFile($"⚠️ Error in Win32_BIOS query: {ex.Message}");
+                            }
+                        }));
+
+                        // Win32_ComputerSystemProduct query
+                        tasks.Add(Task.Run(() =>
+                        {
+                            try
+                            {
+                                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_ComputerSystemProduct"))
+                                using (var collection = searcher.Get())
+                                {
+                                    foreach (ManagementObject mo in collection)
+                                    {
+                                        lock (systemInfo)
+                                        {
+                                            systemInfo["SystemSku"] = mo["IdentifyingNumber"]?.ToString() ?? "Unknown";
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteDebugToFile($"⚠️ Error in Win32_ComputerSystemProduct query: {ex.Message}");
+                            }
+                        }));
+
+                        // Win32_Processor query
+                        tasks.Add(Task.Run(() =>
+                        {
+                            try
+                            {
+                                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Processor"))
+                                using (var collection = searcher.Get())
+                                {
+                                    foreach (ManagementObject mo in collection)
+                                    {
+                                        lock (systemInfo)
+                                        {
+                                            systemInfo["CpuName"] = mo["Name"]?.ToString() ?? "Unknown";
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteDebugToFile($"⚠️ Error in Win32_Processor query: {ex.Message}");
+                            }
+                        }));
+
+                        // Win32_BaseBoard query
+                        tasks.Add(Task.Run(() =>
+                        {
+                            try
+                            {
+                                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard"))
+                                using (var collection = searcher.Get())
+                                {
+                                    foreach (ManagementObject mo in collection)
+                                    {
+                                        lock (systemInfo)
+                                        {
+                                            systemInfo["BaseBoardVersion"] = mo["Version"]?.ToString() ?? "Unknown";
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteDebugToFile($"⚠️ Error in Win32_BaseBoard query: {ex.Message}");
+                            }
+                        }));
+
+                        // Win32_VideoController query
+                        tasks.Add(Task.Run(() =>
+                        {
+                            try
+                            {
+                                using (var searcher = new ManagementObjectSearcher("SELECT Name, AdapterRAM, DriverVersion, PNPDeviceID FROM Win32_VideoController"))
+                                using (var collection = searcher.Get())
+                                {
+                                    var integratedGpu = "";
+                                    var discreteGpu = "";
+                                    
+                                    WriteDebugToFile("🔍 Analyzing detected graphics devices:");
+                                    
+                                    foreach (ManagementObject mo in collection)
+                                    {
+                                        var name = mo["Name"]?.ToString();
+                                        var adapterRAM = mo["AdapterRAM"]?.ToString();
+                                        var pnpDeviceID = mo["PNPDeviceID"]?.ToString();
+                                        
+                                        if (string.IsNullOrEmpty(name)) continue;
+                                        
+                                        WriteDebugToFile($"📱 Found: {name} | RAM: {adapterRAM} | PNP: {pnpDeviceID}");
+                                        
+                                        // Skip virtual, remote, and USB display adapters
+                                        if (name.Contains("Microsoft Basic") ||
+                                            name.Contains("DisplayLink") ||
+                                            name.Contains("Remote") ||
+                                            name.Contains("Virtual") ||
+                                            name.Contains("USB") ||
+                                            name.Contains("VNC") ||
+                                            name.Contains("TeamViewer") ||
+                                            pnpDeviceID?.Contains("USB") == true)
+                                        {
+                                            WriteDebugToFile($"⏭️ Skipping virtual/USB device: {name}");
+                                            continue;
+                                        }
+                                        
+                                        // Identify Intel integrated graphics
+                                        if (name.Contains("Intel") && (name.Contains("UHD") || name.Contains("Iris") || name.Contains("HD Graphics")))
+                                        {
+                                            integratedGpu = name;
+                                            WriteDebugToFile($"🔷 Identified Intel iGPU: {name}");
+                                        }
+                                        // Identify discrete graphics cards (NVIDIA, AMD, Intel Arc)
+                                        else if (name.Contains("NVIDIA") || name.Contains("GeForce") || name.Contains("RTX") || name.Contains("GTX") ||
+                                                name.Contains("AMD") || name.Contains("Radeon") || name.Contains("RX ") ||
+                                                (name.Contains("Intel") && name.Contains("Arc")))
+                                        {
+                                            discreteGpu = name;
+                                            WriteDebugToFile($"🎮 Identified discrete GPU: {name}");
+                                        }
+                                    }
+                                    
+                                    lock (systemInfo)
+                                    {
+                                        systemInfo["IgpuName"] = !string.IsNullOrEmpty(integratedGpu) ? integratedGpu : "Not detected";
+                                        systemInfo["DgpuName"] = !string.IsNullOrEmpty(discreteGpu) ? discreteGpu : "Not detected";
+                                        WriteDebugToFile($"✅ Final GPU assignment - iGPU: {systemInfo["IgpuName"]}, dGPU: {systemInfo["DgpuName"]}");
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteDebugToFile($"⚠️ Error in Win32_VideoController query: {ex.Message}");
+                            }
+                        }));
+
+                        // Wait for all parallel queries to complete
+                        await Task.WhenAll(tasks);
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteDebugToFile($"⚠️ Error in parallel WMI queries: {ex.Message}");
+                    }
+
+                    // Update UI on main thread
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        try
+                        {
+                            if (systemInfo.ContainsKey("SystemModel") && SystemModelText != null)
+                            {
+                                SystemModelText.Text = $"System Model: {systemInfo["SystemModel"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("SystemManufacturer") && SystemManufacturerText != null)
+                            {
+                                SystemManufacturerText.Text = $"System Manufacturer: {systemInfo["SystemManufacturer"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("BiosVersion") && BiosVersionText != null)
+                            {
+                                BiosVersionText.Text = $"BIOS Version: {systemInfo["BiosVersion"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("SystemSku") && SystemSkuText != null)
+                            {
+                                SystemSkuText.Text = $"System SKU: {systemInfo["SystemSku"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("EmbeddedController") && EmbeddedControllerText != null)
+                            {
+                                EmbeddedControllerText.Text = $"Embedded Controller Version: {systemInfo["EmbeddedController"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("SystemVersion") && SystemVersionText != null)
+                            {
+                                SystemVersionText.Text = $"System Version: {systemInfo["SystemVersion"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("CpuName") && CpuInfoText != null)
+                            {
+                                CpuInfoText.Text = $"CPU: {systemInfo["CpuName"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("BaseBoardVersion") && BaseBoardVersionText != null)
+                            {
+                                BaseBoardVersionText.Text = $"BaseBoard Version: {systemInfo["BaseBoardVersion"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("IgpuName") && IgpuInfoText != null)
+                            {
+                                IgpuInfoText.Text = $"iGPU: {systemInfo["IgpuName"]}";
+                            }
+
+                            if (systemInfo.ContainsKey("DgpuName") && DgpuInfoText != null)
+                            {
+                                DgpuInfoText.Text = $"dGPU: {systemInfo["DgpuName"]}";
+                            }
+
+                            WriteDebugToFile("⚡ System information loaded immediately and displayed!");
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteDebugToFile($"⚠️ Error updating UI with system info: {ex.Message}");
+                        }
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                WriteDebugToFile($"⚠️ Error in immediate system info loading: {ex.Message}");
             }
         }
     }

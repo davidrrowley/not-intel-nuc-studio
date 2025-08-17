@@ -30,7 +30,7 @@
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock x:Name="ValueText"
                       Text="0%"
-                      FontSize="14"
+                      FontSize="18"
                       FontWeight="SemiBold"
                       Foreground="White"
                       HorizontalAlignment="Center"/>
@@ -40,6 +40,13 @@
                       Foreground="#FF9CA3AF"
                       HorizontalAlignment="Center"
                       Margin="0,1,0,0"/>
+            <TextBlock x:Name="TemperatureText"
+                      Text="70°C"
+                      FontSize="10"
+                      Foreground="#FF9CA3AF"
+                      HorizontalAlignment="Center"
+                      Margin="0,2,0,0"
+                      Visibility="Collapsed"/>
         </StackPanel>
     </Grid>
 </UserControl>

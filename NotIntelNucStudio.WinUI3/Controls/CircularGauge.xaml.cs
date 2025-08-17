@@ -20,6 +20,12 @@ namespace NotIntelNucStudio.WinUI3.Controls
         public static readonly DependencyProperty StrokeColorProperty =
             DependencyProperty.Register("StrokeColor", typeof(Brush), typeof(CircularGauge), new PropertyMetadata(null, OnStrokeColorChanged));
 
+        public static readonly DependencyProperty TemperatureProperty =
+            DependencyProperty.Register("Temperature", typeof(double), typeof(CircularGauge), new PropertyMetadata(0.0, OnTemperatureChanged));
+
+        public static readonly DependencyProperty ShowTemperatureProperty =
+            DependencyProperty.Register("ShowTemperature", typeof(bool), typeof(CircularGauge), new PropertyMetadata(false, OnShowTemperatureChanged));
+
         public CircularGauge()
         {
             this.InitializeComponent();
@@ -93,6 +99,18 @@ namespace NotIntelNucStudio.WinUI3.Controls
             set { SetValue(StrokeColorProperty, value); }
         }
 
+        public double Temperature
+        {
+            get { return (double)GetValue(TemperatureProperty); }
+            set { SetValue(TemperatureProperty, value); }
+        }
+
+        public bool ShowTemperature
+        {
+            get { return (bool)GetValue(ShowTemperatureProperty); }
+            set { SetValue(ShowTemperatureProperty, value); }
+        }
+
         public string ValuePercentageText
         {
             get
@@ -113,6 +131,18 @@ namespace NotIntelNucStudio.WinUI3.Controls
         {
             var control = (CircularGauge)d;
             control.UpdateStrokeColor();
+        }
+
+        private static void OnTemperatureChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (CircularGauge)d;
+            control.UpdateTemperatureDisplay();
+        }
+
+        private static void OnShowTemperatureChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (CircularGauge)d;
+            control.UpdateTemperatureVisibility();
         }
 
         private void UpdateDisplay()
@@ -136,6 +166,10 @@ namespace NotIntelNucStudio.WinUI3.Controls
             {
                 UnitText.Text = Unit;
             }
+
+            // Update temperature display
+            UpdateTemperatureDisplay();
+            UpdateTemperatureVisibility();
         }
 
         private void UpdateStrokeColor()
@@ -190,6 +224,22 @@ namespace NotIntelNucStudio.WinUI3.Controls
             pathGeometry.Figures.Add(pathFigure);
             
             return pathGeometry;
+        }
+
+        private void UpdateTemperatureDisplay()
+        {
+            if (TemperatureText != null)
+            {
+                TemperatureText.Text = $"{Temperature:F0}°C";
+            }
+        }
+
+        private void UpdateTemperatureVisibility()
+        {
+            if (TemperatureText != null)
+            {
+                TemperatureText.Visibility = ShowTemperature ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
     }
 }
