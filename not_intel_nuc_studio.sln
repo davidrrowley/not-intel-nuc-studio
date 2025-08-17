@@ -12,8 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.WinUI3", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.Service", "NucLedController\NucLedController.Service\NucLedController.Service.csproj", "{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucLedController.Client", "NucLedController\NucLedController.Client\NucLedController.Client.csproj", "{F1E2D3C4-B5A6-9786-4321-FEDCBA987654}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,10 +34,6 @@ Global
 		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1E2D3C4-B5A6-9786-4321-FEDCBA987654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1E2D3C4-B5A6-9786-4321-FEDCBA987654}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1E2D3C4-B5A6-9786-4321-FEDCBA987654}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1E2D3C4-B5A6-9786-4321-FEDCBA987654}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,7 +43,6 @@ Global
 		{DAA4C6E0-DEDF-9319-B049-0A04C7B47DE5} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
 		{C7B2E8F1-3456-7890-ABCD-EF1234567890} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
 		{A1B2C3D4-5678-9ABC-DEF0-123456789ABC} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
-		{F1E2D3C4-B5A6-9786-4321-FEDCBA987654} = {BF83A140-5CEE-D830-E6FF-2B2517A1D878}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {19D61D30-F17B-48B9-AEA5-B62B22438A49}
