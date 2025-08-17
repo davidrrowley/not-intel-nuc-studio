@@ -1,3 +1,5 @@
+#nullable enable
+
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -15,7 +17,7 @@ namespace NucLedController.WinUI3.Views
     public partial class LedsPage : Page
     {
         private string _selectedZone = "Skull";
-        private Dictionary<string, ZoneState> _zoneStates;
+        private Dictionary<string, ZoneState>? _zoneStates;
         private bool _isUpdatingUI = false;
 
         // Zone state tracking
@@ -305,11 +307,13 @@ namespace NucLedController.WinUI3.Views
             UpdateNucVisualRectangle("BottomRight", RightSideLedVisual);
         }
 
-        private void UpdateZoneIndicator(string zone, Rectangle indicator, TextBlock status)
+        private void UpdateZoneIndicator(string zone, Rectangle? indicator, TextBlock? status)
         {
             var zoneState = _zoneStates[zone];
-            indicator.Fill = new SolidColorBrush(StringToColor(zoneState.Color));
-            status.Text = GetPatternDisplayName(zoneState.Pattern);
+            if (indicator != null)
+                indicator.Fill = new SolidColorBrush(StringToColor(zoneState.Color));
+            if (status != null)
+                status.Text = GetPatternDisplayName(zoneState.Pattern);
         }
 
         private void UpdateNucVisualRectangle(string zone, Rectangle visual)
